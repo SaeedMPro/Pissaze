@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
   <diagram name="Page-1" id="lS4l_UGHyEnCVh-3E4Ck">
-    <mxGraphModel dx="1825" dy="1638" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+    <mxGraphModel dx="367" dy="728" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1038,7 +1038,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="LdFAEq9sarEnEC0SSBv0-39" value="number" style="ellipse;whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="2006.25" y="710" width="76.25" height="47.5" as="geometry" />
+          <mxGeometry x="2011" y="702.5" width="76.25" height="47.5" as="geometry" />
         </mxCell>
         <mxCell id="w6JVnywSqi0pG-dbaEL0-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" parent="1" source="LdFAEq9sarEnEC0SSBv0-42" target="w6JVnywSqi0pG-dbaEL0-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -1072,7 +1072,7 @@
         <mxCell id="w6JVnywSqi0pG-dbaEL0-1" value="total price" style="ellipse;whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="2386.09" y="548" width="100" height="35" as="geometry" />
         </mxCell>
-        <mxCell id="w6JVnywSqi0pG-dbaEL0-9" value="" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.31;entryY=0.04;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="LdFAEq9sarEnEC0SSBv0-68" target="w6JVnywSqi0pG-dbaEL0-11" edge="1">
+        <mxCell id="w6JVnywSqi0pG-dbaEL0-9" value="" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;entryX=0.31;entryY=0.04;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="LdFAEq9sarEnEC0SSBv0-68" target="w6JVnywSqi0pG-dbaEL0-11" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1810.25" y="710" as="sourcePoint" />
             <Array as="points" />
@@ -1382,6 +1382,14 @@
         </mxCell>
         <mxCell id="eoPI0Xw65L_IwqqJkxbl-12" value="&lt;font face=&quot;Georgia&quot;&gt;Bank transaction&lt;/font&gt;" style="whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="2014" y="112.5" width="122" height="44.5" as="geometry" />
+        </mxCell>
+        <mxCell id="TL0oi55XwLSw_DGboPtc-54" value="" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;endArrow=none;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" target="TL0oi55XwLSw_DGboPtc-55" source="TL0oi55XwLSw_DGboPtc-42">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2350.61" y="677.8124999999998" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TL0oi55XwLSw_DGboPtc-55" value="number" style="ellipse;whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="2373.75" y="644" width="76.25" height="47.5" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
