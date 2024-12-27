@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
   <diagram name="Page-1" id="lS4l_UGHyEnCVh-3E4Ck">
-    <mxGraphModel dx="636" dy="640" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+    <mxGraphModel dx="2190" dy="1600" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1280,12 +1280,12 @@
             <mxRectangle width="103" height="31" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="8dLLBuQmDuUWFRzG33IX-6" value="&lt;b style=&quot;&quot;&gt;Province&lt;/b&gt;" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;" parent="8dLLBuQmDuUWFRzG33IX-4" vertex="1">
+        <mxCell id="8dLLBuQmDuUWFRzG33IX-6" value="&lt;b&gt;&lt;u&gt;Province&lt;/u&gt;&lt;/b&gt;" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;" parent="8dLLBuQmDuUWFRzG33IX-4" vertex="1">
           <mxGeometry x="103" width="104" height="31" as="geometry">
             <mxRectangle width="104" height="31" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="8dLLBuQmDuUWFRzG33IX-7" value="Reminder" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;" parent="8dLLBuQmDuUWFRzG33IX-4" vertex="1">
+        <mxCell id="8dLLBuQmDuUWFRzG33IX-7" value="&lt;b&gt;&lt;u&gt;Reminder&lt;/u&gt;&lt;/b&gt;" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;strokeColor=inherit;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;pointerEvents=1;" parent="8dLLBuQmDuUWFRzG33IX-4" vertex="1">
           <mxGeometry x="207" width="102" height="31" as="geometry">
             <mxRectangle width="102" height="31" as="alternateBounds" />
           </mxGeometry>
@@ -1407,6 +1407,12 @@
         </mxCell>
         <mxCell id="5AYMDMXQf_sB8vqcUL9e-63" value="&lt;b&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;Discount_Code&lt;/font&gt;&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="9CUZuWpAWRmCC-rXz4-p-2" vertex="1">
           <mxGeometry width="194" height="41" as="geometry" />
+        </mxCell>
+        <mxCell id="_eGSzWb81TR2N_l6SWwb-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;GIUDE&lt;/h1&gt;&lt;p&gt;&lt;b&gt;&lt;u&gt;Bold and Underlined attribute&lt;/u&gt;&lt;/b&gt;&amp;nbsp;= Primary key and maybe Foriegn key&lt;/p&gt;&lt;p&gt;&lt;b&gt;Bold attribute&lt;/b&gt;&amp;nbsp;= just Foriegn key&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="2060" y="7" width="387" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="_eGSzWb81TR2N_l6SWwb-2" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Reason for converting the ISSUED_FOR relation to a table&lt;br&gt;&lt;/h1&gt;&lt;p&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Due to the relatively low participation rate in the relationship, since if a transaction participates in other relationships such as Subscribe, Deposit, or if a transaction fails, it will no longer participate in the ISSUED_FOR relationship.&lt;/font&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="553" y="997" width="667" height="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
