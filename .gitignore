@@ -1,1 +1,5 @@
-.$EER.drawio.bkp
+# Ignore backup files created by draw.io
+*.drawio.bkp
+
+# Ignore Visual Studio Code settings directory
+.vscode/
