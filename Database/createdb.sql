@@ -116,7 +116,7 @@ CREATE TABLE product_ssd (
 
 CREATE TABLE product_motherboard (
     product_id          INT PRIMARY KEY, 
-    chipset             VARCHAR(50),
+    chipset_name        VARCHAR(50),
     num_memory_slots    SMALLINT,
     memory_speed_range  DECIMAL(5, 2),
     wattage             INT,
@@ -195,16 +195,16 @@ CREATE TABLE address_of_client (
 CREATE TABLE shopping_cart (
     cart_number    SERIAL NOT NULL, 
     client_id      INT NOT NULL,
-    cat_status    cart_status_enum NOT NULL,
+    cart_status    cart_status_enum NOT NULL,
     PRIMARY KEY (client_id, cart_number),
     FOREIGN KEY (client_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE discount_code (
     code            INT PRIMARY KEY, 
-    amount          DECIMAL(5, 2),
-    discount_limit  DECIMAL(5, 2),
-    usage_count     SMALLINT, 
+    amount          DECIMAL(5, 2) CHECK (amount > 0),
+    discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
+    usage_count     SMALLINT CHECK (usage_count >= 0), 
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
 );
@@ -222,7 +222,7 @@ CREATE TABLE private_code (
 CREATE TABLE transaction (
     tracking_code       INT PRIMARY KEY, 
     transaction_status  transaction_enum NOT NULL,
-    time_stamp          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    time_stamp          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 --I decide to delete wallet_transaction and instead add `type` in transaction
@@ -269,13 +269,11 @@ CREATE TABLE added_to (
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
     product_id      INT NOT NULL, 
-    quantity        SMALLINT,
-    cart_price      DECIMAL(12, 2),
+    quantity        SMALLINT CHECK (quantity > 0),
+    cart_price      DECIMAL(12, 2) CHECK (cart_price >= 0),
     PRIMARY KEY (client_id, cart_number, locked_number, product_id),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (locked_number) REFERENCES locked_shopping_cart (discount_code) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (client_id) REFERENCES locked_shopping_cart (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (cart_number) REFERENCES locked_shopping_cart (cart_number) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE applied_to (
@@ -286,9 +284,7 @@ CREATE TABLE applied_to (
     time_stamp      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (client_id, cart_number, locked_number, discount_code),
     FOREIGN KEY (discount_code) REFERENCES discount_code (code) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (locked_number) REFERENCES locked_shopping_cart (discount_code) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (client_id) REFERENCES locked_shopping_cart (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (cart_number) REFERENCES locked_shopping_cart (cart_number) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE issued_for (
@@ -296,7 +292,5 @@ CREATE TABLE issued_for (
     cart_number     INT NOT NULL, 
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
-    FOREIGN KEY (locked_number) REFERENCES locked_shopping_cart (discount_code) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (client_id) REFERENCES locked_shopping_cart (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (cart_number) REFERENCES locked_shopping_cart (cart_number) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
