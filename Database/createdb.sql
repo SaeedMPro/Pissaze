@@ -238,8 +238,7 @@ CREATE TABLE locked_shopping_cart (
     client_id       INT NOT NULL,
     locked_number   SERIAL NOT NULL,
     PRIMARY KEY (client_id, cart_number, locked_number),
-    FOREIGN KEY (client_id) REFERENCES shopping_cart (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (cart_number) REFERENCES shopping_cart (cart_number) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (client_id, cart_number) REFERENCES shopping_cart (client_id, cart_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE deposit_wallet (
