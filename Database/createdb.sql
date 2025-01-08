@@ -170,12 +170,12 @@ CREATE TABLE compatible_gm_slot (
 
 CREATE TABLE client (
     client_id          SERIAL PRIMARY KEY, 
-    phone_number       TEXT NOT NULL UNIQUE,
+    phone_number       VARCHAR(15) NOT NULL UNIQUE,
     first_name         VARCHAR(50) NOT NULL,
     last_name          VARCHAR(50) NOT NULL,
     wallet_balance     DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     time_stamp         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    referral_code      BIGINT NOT NULL UNIQUE
+    referral_code      VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE vip_client (
@@ -257,8 +257,8 @@ CREATE TABLE subscribes (
 );
 
 CREATE TABLE refers (
-    referee_id  INT PRIMARY KEY, 
-    referrer_id INT NOT NULL,
+    referee_id  VARCHAR(20) PRIMARY KEY, 
+    referrer_id VARCHAR(20) NOT NULL,
     FOREIGN KEY (referee_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (referrer_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
