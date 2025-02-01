@@ -205,7 +205,7 @@ CREATE TABLE discount_code (
     code            INT PRIMARY KEY, 
     amount          DECIMAL(5, 2) CHECK (amount > 0),
     discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
-    usage_count     SMALLINT CHECK (usage_count >= 0), 
+    usage_count     SMALLINT DEFAULT 0 CHECK (usage_count >= 0) , 
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
 );
@@ -294,3 +294,65 @@ CREATE TABLE issued_for (
     locked_number   INT NOT NULL,
     FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+-- triggers and events --
+
+/*
+trigger: If a user refers another user, a discount code appropriate to their position in the referral chain
+should be gifted to all users in that chain.
+*/
+CREATE OR REPLACE FUNCTION handle_referral() 
+RETURNS TRIGGER AS $$
+DECLARE
+    referrer_id         VARCHAR(20);
+    referee_id          VARCHAR(20) := NEW.referee_id;
+    current_level       INT := 0;
+    discount_percentage DECIMAL(5, 2);
+    new_discount_code   INT;
+    client_id           INT;
+BEGIN
+    SELECT r.referrer_id INTO referrer_id
+    FROM refers r
+    WHERE r.referee_id = referee_id;
+
+    -- Loop through the referral chain
+    WHILE referrer_id IS NOT NULL LOOP
+        CASE current_level
+            WHEN 0 THEN discount_percentage := 50;
+            ELSE discount_percentage := 50 / (2 * current_level);
+        END CASE;
+
+        SELECT c.client_id INTO client_id
+        FROM client c
+        WHERE referee_id = referral_code;
+
+        IF discount_percentage < 1 THEN
+            --for fixed discount (discount_percentage < 1%) assign discount_percentage = 0 and discount_limit = 50000
+            INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
+            VALUES (nextval('discount_code_code_seq'), 0, 50000, NOW() + INTERVAL '1 week', 'private')
+            RETURNING code INTO new_discount_code;
+        ELSE 
+            INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
+            VALUES (nextval('discount_code_code_seq'), discount_percentage, 1000000, NOW() + INTERVAL '1 week', 'private')
+            RETURNING code INTO new_discount_code;
+        END IF;
+
+        INSERT INTO private_code (code, client_id, time_stamp)
+        VALUES (new_discount_code, client_id, NOW());
+
+        SELECT r.referrer_id , r.referee_id 
+        INTO referrer_id, referee_id
+        FROM refers r
+        WHERE r.referee_id = referrer_id;
+
+        current_level := current_level + 1;
+    END LOOP;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER referral_trigger
+AFTER INSERT ON refers
+FOR EACH ROW
+EXECUTE FUNCTION handle_referral();
