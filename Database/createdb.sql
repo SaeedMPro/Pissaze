@@ -13,7 +13,8 @@ CREATE TYPE discount_enum AS ENUM ('public', 'private');
 CREATE TYPE transaction_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
 CREATE TYPE cart_status_enum AS ENUM ('locked', 'registered', 'blocked');
 
--- Table Definitions
+-- Table Definitions --
+
 CREATE TABLE product (
     id              INT PRIMARY KEY, 
     brand           VARCHAR(50) NOT NULL,
@@ -259,8 +260,8 @@ CREATE TABLE subscribes (
 CREATE TABLE refers (
     referee_id  VARCHAR(20) PRIMARY KEY, 
     referrer_id VARCHAR(20) NOT NULL,
-    FOREIGN KEY (referee_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (referrer_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (referee_id) REFERENCES client (referral_code) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (referrer_id) REFERENCES client (referral_code) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE added_to (
