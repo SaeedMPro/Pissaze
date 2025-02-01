@@ -356,3 +356,29 @@ CREATE TRIGGER referral_trigger
 AFTER INSERT ON refers
 FOR EACH ROW
 EXECUTE FUNCTION handle_referral();
+
+/*
+trigger: No user should be able to add a product to their cart that is out of stock.
+*/
+CREATE OR REPLACE FUNCTION check_product_stock()
+RETURNS TRIGGER AS $$
+DECLARE
+    stock_count SMALLINT;
+BEGIN
+    SELECT p.stock_count INTO stock_count
+    FROM product p
+    WHERE p.id = NEW.product_id;
+
+    IF stock_count < NEW.quantity THEN
+        RAISE EXCEPTION 
+        'Not enough stock available for product_id: %', NEW.product_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prevent_out_of_stock_trigger
+BEFORE INSERT OR UPDATE ON added_to
+FOR EACH ROW
+EXECUTE FUNCTION check_product_stock();
