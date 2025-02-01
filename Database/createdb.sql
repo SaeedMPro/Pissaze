@@ -382,3 +382,22 @@ CREATE TRIGGER prevent_out_of_stock_trigger
 BEFORE INSERT OR UPDATE ON added_to
 FOR EACH ROW
 EXECUTE FUNCTION check_product_stock();
+
+/*
+trigger: Adding a product to the cart should reduce its stock count in the inventory.
+*/
+CREATE OR REPLACE FUNCTION reduce_stock_after_add_to_cart()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE product
+    SET stock_count = stock_count - NEW.quantity
+    WHERE id = NEW.product_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reduce_stock_trigger
+AFTER INSERT ON added_to
+FOR EACH ROW
+EXECUTE FUNCTION reduce_stock_after_add_to_cart();
