@@ -203,7 +203,7 @@ CREATE TABLE shopping_cart (
 
 CREATE TABLE discount_code (
     code            INT PRIMARY KEY, 
-    amount          DECIMAL(5, 2) CHECK (amount > 0),
+    amount          DECIMAL(10, 2) CHECK (amount > 0),
     discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
     usage_count     SMALLINT DEFAULT 0 CHECK (usage_count >= 0) , 
     expiration_time TIMESTAMP,
@@ -307,7 +307,7 @@ DECLARE
     referrer_id         VARCHAR(20);
     referee_id          VARCHAR(20) := NEW.referee_id;
     current_level       INT := 0;
-    discount_percentage DECIMAL(5, 2);
+    discount_percentage DECIMAL(10, 2);
     new_discount_code   INT;
     client_id           INT;
 BEGIN
@@ -319,7 +319,7 @@ BEGIN
     WHILE referrer_id IS NOT NULL LOOP
         CASE current_level
             WHEN 0 THEN discount_percentage := 50;
-            ELSE discount_percentage := 50 / (2 * current_level);
+            ELSE discount_percentage := (50 / (2 * current_level)) / 100;
         END CASE;
 
         SELECT c.client_id INTO client_id
@@ -327,9 +327,9 @@ BEGIN
         WHERE referee_id = referral_code;
 
         IF discount_percentage < 1 THEN
-            --for fixed discount (discount_percentage < 1%) assign discount_percentage = 0 and discount_limit = 50000
+            --fixed discount (discount_percentage < 1%) 
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
-            VALUES (nextval('discount_code_code_seq'), 0, 50000, NOW() + INTERVAL '1 week', 'private')
+            VALUES (nextval('discount_code_code_seq'), 50000, 50000, NOW() + INTERVAL '1 week', 'private')
             RETURNING code INTO new_discount_code;
         ELSE 
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
