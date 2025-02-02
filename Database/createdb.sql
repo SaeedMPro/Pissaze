@@ -401,3 +401,44 @@ CREATE TRIGGER reduce_stock_trigger
 AFTER INSERT ON added_to
 FOR EACH ROW
 EXECUTE FUNCTION reduce_stock_after_add_to_cart();
+
+
+/*
+trigger: Registered users should have access to only one shopping cart,
+and VIP users should have access to up to five shopping carts
+*/
+CREATE OR REPLACE FUNCTION enforce_cart_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+    cart_count INT;
+    is_vip BOOLEAN;
+BEGIN
+    
+    SELECT EXISTS (
+        SELECT 1
+        FROM vip_client
+        WHERE client_id = NEW.client_id
+    ) INTO is_vip;
+
+    SELECT COUNT(*) INTO cart_count
+    FROM shopping_cart
+    WHERE client_id = NEW.client_id;
+
+    IF is_vip THEN
+        IF cart_count >= 5 THEN
+            RAISE EXCEPTION 'vip users cannot have more than five shopping carts.';
+        END IF;
+    ELSE
+        IF cart_count >= 1 THEN
+            RAISE EXCEPTION 'Registered users cannot have more than one shopping cart.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_cart_limit_trigger
+BEFORE INSERT ON shopping_cart
+FOR EACH ROW
+EXECUTE FUNCTION enforce_cart_limit();
