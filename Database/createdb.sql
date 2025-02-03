@@ -320,7 +320,7 @@ BEGIN
     WHILE referrer_id IS NOT NULL LOOP
         CASE current_level
             WHEN 0 THEN discount_percentage := 50;
-            ELSE discount_percentage := (50 / (2 * current_level)) / 100;
+            ELSE discount_percentage := 50 / (2 * current_level);
         END CASE;
 
         SELECT c.client_id INTO client_id
@@ -333,6 +333,7 @@ BEGIN
             VALUES (nextval('discount_code_code_seq'), 50000, 50000, NOW() + INTERVAL '1 week', 'private')
             RETURNING code INTO new_discount_code;
         ELSE 
+            discount_percentage := discount_percentage / 100 
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
             VALUES (nextval('discount_code_code_seq'), discount_percentage, 1000000, NOW() + INTERVAL '1 week', 'private')
             RETURNING code INTO new_discount_code;
