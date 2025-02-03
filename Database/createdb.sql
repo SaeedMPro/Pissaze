@@ -11,7 +11,7 @@ CREATE DATABASE pissaze_system;
 CREATE TYPE cooling_method_enum AS ENUM ('liquid', 'air');
 CREATE TYPE discount_enum AS ENUM ('public', 'private');
 CREATE TYPE transaction_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
-CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked');
+CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
 
 -- Table Definitions --
 
@@ -361,6 +361,44 @@ EXECUTE FUNCTION handle_referral();
 
 /*
 Ensures that:
+    blocked cart should not be accessible or registered.
+*/
+CREATE OR REPLACE FUNCTION check_blocked_cart()
+RETURNS TRIGGER AS $$
+DECLARE
+    cart_status cart_status_enum;
+BEGIN
+    SELECT cart_status
+    INTO cart_status
+    FROM locked_shopping_cart NATURAL JOIN shopping_cart
+    WHERE cart_number = NEW.cart_number;
+
+    IF cart_status = 'blocked'THEN
+        RAISE EXCEPTION 'Operation not allowed: Cart % is blocked.', NEW.cart_number;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prevent_adding_blocked_cart_trigger
+BEFORE INSERT OR UPDATE ON added_to
+FOR EACH ROW
+EXECUTE FUNCTION check_blocked_cart();
+
+CREATE TRIGGER prevent_issued_for_blocked_cart_trigger
+BEFORE INSERT OR UPDATE ON issued_for
+FOR EACH ROW
+EXECUTE FUNCTION check_blocked_cart();
+
+CREATE TRIGGER prevent_applied_to_blocked_cart_trigger
+BEFORE INSERT OR UPDATE ON applied_to
+FOR EACH ROW
+EXECUTE FUNCTION check_blocked_cart();
+
+
+/*
+Ensures that:
     No user should be able to add a product to their cart that is out of stock.
 */
 CREATE OR REPLACE FUNCTION check_product_stock()
@@ -459,10 +497,10 @@ RETURNS TRIGGER AS $$
 DECLARE
     code_record RECORD;
 BEGIN
-    SELECT usage_count, usage_limit, expiration_time
+    SELECT d.usage_count, d.usage_limit, d.expiration_time
     INTO code_record
-    FROM discount_code
-    WHERE code = NEW.code;
+    FROM discount_code d
+    WHERE d.code = NEW.code;
 
     IF code_record IS NULL THEN
         RAISE EXCEPTION 'Invalid discount code.';
