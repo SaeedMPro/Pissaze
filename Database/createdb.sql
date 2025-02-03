@@ -205,7 +205,7 @@ CREATE TABLE discount_code (
     code            INT PRIMARY KEY, 
     amount          DECIMAL(10, 2) CHECK (amount > 0),
     discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
-    usage_count     SMALLINT DEFAULT 0 CHECK (usage_count >= 0) , 
+    usage_limit     SMALLINT DEFAULT 0 CHECK (usage_limit >= 0) , 
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
 );
@@ -298,8 +298,9 @@ CREATE TABLE issued_for (
 -- triggers and events --
 
 /*
-trigger: If a user refers another user, a discount code appropriate to their position in the referral chain
-should be gifted to all users in that chain.
+Ensures that: 
+    If a user refers another user, a discount code appropriate to their position in the referral chain
+    should be gifted to all users in that chain.
 */
 CREATE OR REPLACE FUNCTION handle_referral() 
 RETURNS TRIGGER AS $$
@@ -358,7 +359,8 @@ FOR EACH ROW
 EXECUTE FUNCTION handle_referral();
 
 /*
-trigger: No user should be able to add a product to their cart that is out of stock.
+Ensures that:
+    No user should be able to add a product to their cart that is out of stock.
 */
 CREATE OR REPLACE FUNCTION check_product_stock()
 RETURNS TRIGGER AS $$
@@ -384,7 +386,8 @@ FOR EACH ROW
 EXECUTE FUNCTION check_product_stock();
 
 /*
-trigger: Adding a product to the cart should reduce its stock count in the inventory.
+Ensures that: 
+    Adding a product to the cart should reduce its stock count in the inventory.
 */
 CREATE OR REPLACE FUNCTION reduce_stock_after_add_to_cart()
 RETURNS TRIGGER AS $$
@@ -404,8 +407,9 @@ EXECUTE FUNCTION reduce_stock_after_add_to_cart();
 
 
 /*
-trigger: Registered users should have access to only one shopping cart,
-and VIP users should have access to up to five shopping carts
+Ensures that:
+    Registered users should have access to only one shopping cart,
+    and VIP users should have access to up to five shopping carts
 */
 CREATE OR REPLACE FUNCTION enforce_cart_limit()
 RETURNS TRIGGER AS $$
@@ -442,3 +446,40 @@ CREATE TRIGGER enforce_cart_limit_trigger
 BEFORE INSERT ON shopping_cart
 FOR EACH ROW
 EXECUTE FUNCTION enforce_cart_limit();
+
+
+/*
+Ensures that: 
+    1.No user shall use a discount code more than the number of times it is allowed.
+    2.No user shall use an expired discount code. 
+*/
+CREATE OR REPLACE FUNCTION enforce_apply_discount()
+RETURNS TRIGGER AS $$
+DECLARE
+    code_record RECORD;
+BEGIN
+    SELECT usage_count, usage_limit, expiration_time
+    INTO code_record
+    FROM discount_code
+    WHERE code = NEW.code;
+
+    IF code_record IS NULL THEN
+        RAISE EXCEPTION 'Invalid discount code.';
+    END IF;
+
+    IF code_record.expiration_time < NOW() THEN
+        RAISE EXCEPTION 'The discount code has expired.';
+    END IF;
+
+    IF code_record.usage_count >= code_record.usage_limit THEN
+        RAISE EXCEPTION 'The usage limit for this discount code has been reached.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_expiration_limit_discount_trigger
+BEFORE INSERT ON applied_to
+FOR EACH ROW
+EXECUTE FUNCTION enforce_apply_discount();
