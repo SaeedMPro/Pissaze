@@ -11,7 +11,7 @@ CREATE DATABASE pissaze_system;
 CREATE TYPE cooling_method_enum AS ENUM ('liquid', 'air');
 CREATE TYPE discount_enum AS ENUM ('public', 'private');
 CREATE TYPE transaction_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
-CREATE TYPE cart_status_enum AS ENUM ('locked', 'registered', 'blocked');
+CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked');
 
 -- Table Definitions --
 
