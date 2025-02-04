@@ -10,7 +10,8 @@ CREATE DATABASE pissaze_system;
 -- Create ENUM types
 CREATE TYPE cooling_method_enum AS ENUM ('liquid', 'air');
 CREATE TYPE discount_enum AS ENUM ('public', 'private');
-CREATE TYPE transaction_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
+CREATE TYPE transaction_status_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
+CREATE TYPE transaction_type_enum AS ENUM ('bank', 'wallet');
 CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
 
 -- Table Definitions --
@@ -222,7 +223,8 @@ CREATE TABLE private_code (
 
 CREATE TABLE transaction (
     tracking_code       INT PRIMARY KEY, 
-    transaction_status  transaction_enum NOT NULL,
+    transaction_status  transaction_status_enum NOT NULL,
+    transaction_type    
     time_stamp          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -522,3 +524,61 @@ CREATE TRIGGER check_expiration_limit_discount_trigger
 BEFORE INSERT ON applied_to
 FOR EACH ROW
 EXECUTE FUNCTION enforce_apply_discount();
+
+
+/*
+Ensures that: 
+    With a deposit into the wallet, the wallet balance of the client increases. 
+*/
+CREATE OR REPLACE FUNCTION deposit()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE client
+    SET wallet_balance = wallet_balance + amount
+    WHERE client_id = NEW.client_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER deposit_into_wallet_trigger
+AFTER INSERT ON deposit_wallet
+FOR EACH ROW
+EXECUTE FUNCTION deposit();
+
+
+/*
+Ensures that: 
+    By purchasing product or subscriptions using a digital wallet,
+    the wallet balance of the client  decreases.
+*/
+CREATE OR REPLACE FUNCTION reduce_wallet()
+RETURNS TRIGGER AS $$
+DECLARE
+    transaction_type transaction_type_enum;
+BEGIN
+
+    SELECT transaction_type
+    INTO transaction_type
+    FROM transaction
+    WHERE tracking_code = NEW.tracking_code;
+
+    IF transaction_type = 'wallet' THEN
+        UPDATE client
+        SET wallet_balance = wallet_balance - amount
+        WHERE client_id = NEW.client_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reduce_user_wallet_trigger
+AFTER INSERT ON issued_for
+FOR EACH ROW
+EXECUTE FUNCTION reduce_wallet();
+
+CREATE TRIGGER reduce_user_wallet_trigger
+AFTER INSERT ON subscribes
+FOR EACH ROW
+EXECUTE FUNCTION reduce_wallet();
