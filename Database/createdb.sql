@@ -582,3 +582,24 @@ CREATE TRIGGER reduce_user_wallet_trigger
 AFTER INSERT ON subscribes
 FOR EACH ROW
 EXECUTE FUNCTION reduce_wallet();
+
+
+/*
+Ensures that:
+    when an order is finalized and paid, the associated cart is unlocked.
+*/
+CREATE OR REPLACE FUNCTION unlock_cart_after_payment()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE shopping_cart
+    SET cart_status = 'active'
+    WHERE cart_number = NEW.cart_number;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER unlock_cart_trigger
+AFTER INSERT ON issued_for
+FOR EACH ROW
+EXECUTE FUNCTION unlock_cart_after_payment();
