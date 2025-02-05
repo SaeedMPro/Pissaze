@@ -7,6 +7,16 @@ CREATE DATABASE pissaze_system;
 -- Connect to the database
 \c pissaze_system
 
+-- Create extension for job scheduled (pg_cron)
+/*
+   This extension allows for scheduling cron jobs directly within PostgreSQL (for Unix-based systems).
+   Ensure pg_cron is installed in the default database (postgres) before using it in other databases.
+   After installing, change `shared_preload_libraries = 'pg_cron'` in `postgresql.conf`.
+   Also, add `cron.database_name = 'pissaze_system'` to `postgresql.conf`.
+*/
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+
 -- Create ENUM types
 CREATE TYPE cooling_method_enum AS ENUM ('liquid', 'air');
 CREATE TYPE discount_enum AS ENUM ('public', 'private');
@@ -297,7 +307,7 @@ CREATE TABLE issued_for (
     FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--- triggers and events --
+-- triggers  --
 
 /*
 Ensures that: 
@@ -605,3 +615,46 @@ CREATE TRIGGER unlock_cart_trigger
 AFTER INSERT ON issued_for
 FOR EACH ROW
 EXECUTE FUNCTION unlock_cart_after_payment();
+
+
+-- Job scheduler --
+
+/*
+Job:
+    15% of the cost paid on orders must be returned to the digital wallet of special users on a monthly basis.
+*/
+CREATE OR REPLACE FUNCTION add_monthly_cashback()
+RETURNS VOID AS $$
+DECLARE
+    vip_client_record RECORD;
+    cashback_amount DECIMAL(12,2);
+BEGIN
+    FOR vip_client_record IN 
+        SELECT c.client_id, SUM(at.cart_price) * 0.15 AS total_cashback
+        FROM issued_for ifo
+        JOIN transaction t ON ifo.tracking_code = t.tracking_code
+        JOIN added_to adt ON ifo.client_id = adt.client_id AND ifo.cart_number = adt.cart_number AND ifo.locked_number = adt.locked_number
+        JOIN vip_client vc ON ifo.client_id = vc.client_id
+        WHERE t.transaction_status = 'Successful'
+        AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+        AND t.time_stamp < DATE_TRUNC('month', CURRENT_DATE)
+        GROUP BY c.client_id
+    LOOP
+        cashback_amount := vip_client_record.total_cashback;
+        
+        UPDATE client
+        SET wallet_balance = wallet_balance + cashback_amount
+        WHERE client_id = vip_client_record.client_id;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+SELECT cron.schedule(
+    '0 0 1 * *', -- Runs at midnight on the 1st of each month
+    'SELECT add_monthly_cashback()'
+);
+
+
+
+
