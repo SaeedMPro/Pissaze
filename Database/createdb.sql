@@ -206,7 +206,7 @@ CREATE TABLE discount_code (
     code            INT PRIMARY KEY, 
     amount          DECIMAL(10, 2) CHECK (amount > 0),
     discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
-    usage_limit     SMALLINT DEFAULT 0 CHECK (usage_limit >= 0) , 
+    usage_limit     SMALLINT DEFAULT 1 CHECK (usage_limit >= 0) , 
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
 );
@@ -224,7 +224,7 @@ CREATE TABLE private_code (
 CREATE TABLE transaction (
     tracking_code       INT PRIMARY KEY, 
     transaction_status  transaction_status_enum NOT NULL,
-    transaction_type    
+    transaction_type    transaction_type_enum NOT NULL,
     time_stamp          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -334,11 +334,13 @@ BEGIN
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
             VALUES (nextval('discount_code_code_seq'), 50000, 50000, NOW() + INTERVAL '1 week', 'private')
             RETURNING code INTO new_discount_code;
+            --usage_limit (default) = 1
         ELSE 
-            discount_percentage := discount_percentage / 100 
+            discount_percentage := discount_percentage / 100 ;
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
             VALUES (nextval('discount_code_code_seq'), discount_percentage, 1000000, NOW() + INTERVAL '1 week', 'private')
             RETURNING code INTO new_discount_code;
+            --usage_limit (default) = 1
         END IF;
 
         INSERT INTO private_code (code, client_id, time_stamp)
