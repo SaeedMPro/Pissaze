@@ -478,9 +478,11 @@ BEGIN
         WHERE client_id = NEW.client_id
     ) INTO is_vip;
 
-    SELECT COUNT(*) INTO cart_count
+    SELECT COUNT(*) 
+    INTO cart_count
     FROM shopping_cart
-    WHERE client_id = NEW.client_id;
+    WHERE client_id = NEW.client_id
+      AND cart_status = 'active';
 
     IF is_vip THEN
         IF cart_count >= 5 THEN
@@ -497,7 +499,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER enforce_cart_limit_trigger
-BEFORE INSERT ON shopping_cart
+BEFORE INSERT OR UPDATE ON shopping_cart
 FOR EACH ROW
 EXECUTE FUNCTION enforce_cart_limit();
 
@@ -624,7 +626,6 @@ Ensures that:
     - If a client already exists in vip_client, update the expiration_time.
     - If the client is not in vip_client, insert them with an expiration time of 1 month.
 */
-
 CREATE OR REPLACE FUNCTION convert_to_vip()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -730,4 +731,41 @@ $$ LANGUAGE plpgsql;
 SELECT cron.schedule(
     '0 0 * * *', -- Runs daily at midnight
     'SELECT check_order();'
+);
+
+
+/*
+Job:
+    When a VIP subscription expires, the user's additional shopping carts 
+    (except the first one that all registered users have) should be removed.
+*/
+CREATE OR REPLACE FUNCTION handle_subscription_end()
+RETURN VOID AS $$
+    vip_rec RECORD;
+BEGIN
+    FOR vip_rec IN
+        SELECT *
+        FROM vip_client
+        WHERE expiration_time < NOW();
+    LOOP
+        -- Block additional carts (cart_number > 1)
+        FOR cart_rec IN
+            SELECT cart_number
+            FROM shopping_cart
+            WHERE client_id = vip_rec.client_id
+              AND cart_number > 1  
+        LOOP
+            UPDATE shopping_cart
+            SET cart_status = 'blocked'
+            WHERE client_id = vip_rec.client_id
+              AND cart_number = cart_rec.cart_number;
+        END LOOP;
+
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT cron.schedule(
+    '0 0 * * *', -- Runs daily at midnight
+    'SELECT handle_subscription_end();'
 );
