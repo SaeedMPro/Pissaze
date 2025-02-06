@@ -601,23 +601,34 @@ EXECUTE FUNCTION reduce_wallet();
 
 /*
 Ensures that:
-    when an order is finalized and paid, the associated cart is unlocked.
+    - when an order is finalized and paid, the associated cart is unlocked.
+    - If the user's subscription has expired and the shopping cart is locked,
+        the cart will be blocked after finalizing.
 */
 CREATE OR REPLACE FUNCTION unlock_cart_after_payment()
 RETURNS TRIGGER AS $$
+DECLARE
+    is_vip_expired BOOLEAN;
 BEGIN
-    UPDATE shopping_cart
-    SET cart_status = 'active'
-    WHERE cart_number = NEW.cart_number;
+    SELECT (v.expiration_time < NOW()) INTO is_vip_expired
+    FROM vip_client v
+    WHERE v.client_id = NEW.client_id;
+
+    IF is_vip_expired THEN
+        UPDATE shopping_cart
+        SET cart_status = 'blocked'
+        WHERE client_id = NEW.client_id
+          AND cart_number = NEW.cart_number;
+    ELSE
+        UPDATE shopping_cart
+        SET cart_status = 'active'  
+        WHERE client_id = NEW.client_id
+          AND cart_number = NEW.cart_number;
+    END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER unlock_cart_trigger
-AFTER INSERT ON issued_for
-FOR EACH ROW
-EXECUTE FUNCTION unlock_cart_after_payment();
 
 
 /*
@@ -748,12 +759,13 @@ BEGIN
         FROM vip_client
         WHERE expiration_time < NOW();
     LOOP
-        -- Block additional carts (cart_number > 1)
+        -- Block additional carts (cart_number > 1) except locked cart
         FOR cart_rec IN
             SELECT cart_number
             FROM shopping_cart
             WHERE client_id = vip_rec.client_id
               AND cart_number > 1  
+              AND cart_status <> 'locked'
         LOOP
             UPDATE shopping_cart
             SET cart_status = 'blocked'
