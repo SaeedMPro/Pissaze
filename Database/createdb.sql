@@ -250,6 +250,7 @@ CREATE TABLE locked_shopping_cart (
     cart_number     INT NOT NULL, 
     client_id       INT NOT NULL,
     locked_number   SERIAL NOT NULL,
+    time_stamp      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (client_id, cart_number, locked_number),
     FOREIGN KEY (client_id, cart_number) REFERENCES shopping_cart (client_id, cart_number) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -281,7 +282,7 @@ CREATE TABLE added_to (
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
     product_id      INT NOT NULL, 
-    quantity        SMALLINT CHECK (quantity > 0),
+    quantity        INT CHECK (quantity > 0),
     cart_price      DECIMAL(12, 2) CHECK (cart_price >= 0),
     PRIMARY KEY (client_id, cart_number, locked_number, product_id),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -674,12 +675,59 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
 SELECT cron.schedule(
     '0 0 1 * *', -- Runs at midnight on the 1st of each month
     'SELECT add_monthly_cashback()'
 );
 
 
+/*
+Job:
+    If the user fails to finalize their order and make the payment within the 3-day period:
+    - The following actions must be taken:
+    - Items in the shopping cart should be returned to inventory, and their stock levels must be updated.
+    - The user's shopping cart should be blocked for 7 days.
+*/
+CREATE OR REPLACE FUNCTION check_order()
+RETURNS VOID AS $$
+DECLARE 
+    locked_cart_expired RECORD;
+    product_rec RECORD;
+BEGIN
+    FOR locked_cart_expired IN 
+        SELECT *
+        FROM locked_shopping_cart NATURAL JOIN shopping_cart 
+        WHERE cart_status = 'locked' 
+          AND (NOW() - time_stamp) > INTERVAL '3 day'
+    LOOP
+        -- Return amount of products stock count
+        FOR product_rec IN 
+            SELECT product_id, quantity
+            FROM locked_cart_expired NATURAL JOIN added_to
+        LOOP
+            UPDATE product 
+            SET stock_count = stock_count + product_rec.quantity
+            WHERE id = product_rec.product_id;
+        END LOOP;
 
+        -- Blocking the shopping cart for 7 days
+        UPDATE shopping_cart
+        SET cart_status = 'blocked'
+        WHERE cart_number = locked_cart_expired.cart_number
+          AND client_id = locked_cart_expired.client_id;
+        
+        UPDATE locked_shopping_cart
+        SET time_stamp = NOW() + INTERVAL '7 days'
+        WHERE cart_number = locked_cart_expired.cart_number
+          AND client_id = locked_cart_expired.client_id
+          AND locked_number = locked_cart_expired.locked_number;
 
+    END LOOP;
+
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT cron.schedule(
+    '0 0 * * *', -- Runs daily at midnight
+    'SELECT check_order();'
+);
