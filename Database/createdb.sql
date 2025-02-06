@@ -617,6 +617,31 @@ FOR EACH ROW
 EXECUTE FUNCTION unlock_cart_after_payment();
 
 
+/*
+Ensures that:
+    After a subscription :
+    - If a client already exists in vip_client, update the expiration_time.
+    - If the client is not in vip_client, insert them with an expiration time of 1 month.
+*/
+
+CREATE OR REPLACE FUNCTION convert_to_vip()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO vip_client(client_id, expiration_time)
+    VALUES (NEW.client_id, NOW() + INTERVAL '1 month')
+    ON CONFLICT (client_id) 
+    DO UPDATE SET expiration_time = NOW() + INTERVAL '1 month'; 
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER convert_vip_after_sub_trigger
+AFTER INSERT ON subscribes 
+FOR EACH ROW
+EXECUTE FUNCTION convert_to_vip();
+
+
 -- Job scheduler --
 
 /*
