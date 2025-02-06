@@ -27,7 +27,7 @@ CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
 -- Table Definitions --
 
 CREATE TABLE product (
-    id              INT PRIMARY KEY, 
+    id              SERIAL PRIMARY KEY, 
     brand           VARCHAR(50) NOT NULL,
     model           VARCHAR(50) NOT NULL,
     current_price   INT,
@@ -37,7 +37,7 @@ CREATE TABLE product (
 );
 
 CREATE TABLE product_hdd (
-    product_id          SERIAL PRIMARY KEY, 
+    product_id          INT PRIMARY KEY, 
     capacity            DECIMAL(5, 2),          
     rotational_speed    INT,  
     wattage             INT,           
@@ -48,7 +48,7 @@ CREATE TABLE product_hdd (
 );
 
 CREATE TABLE product_cooler (
-    product_id              SERIAL PRIMARY KEY, 
+    product_id              INT PRIMARY KEY, 
     cooling_method          cooling_method_enum,
     fan_size                INT,              
     max_rotational_speed    INT,  
@@ -60,7 +60,7 @@ CREATE TABLE product_cooler (
 );
 
 CREATE TABLE product_cpu (
-    product_id          SERIAL PRIMARY KEY, 
+    product_id          INT PRIMARY KEY, 
     generation          VARCHAR(50),
     microarchitecture   VARCHAR(50),
     num_cores           SMALLINT,
@@ -73,7 +73,7 @@ CREATE TABLE product_cpu (
 );
 
 CREATE TABLE product_ram_stick (
-    product_id  SERIAL PRIMARY KEY, 
+    product_id  INT PRIMARY KEY, 
     generation  VARCHAR(50),
     capacity    DECIMAL(5, 2),    
     frequency   DECIMAL(5, 2),   
@@ -85,7 +85,7 @@ CREATE TABLE product_ram_stick (
 );
 
 CREATE TABLE product_case (
-    product_id      SERIAL PRIMARY KEY, 
+    product_id      INT PRIMARY KEY, 
     product_type    VARCHAR(50),
     color           VARCHAR(50),
     material        VARCHAR(50),
@@ -99,7 +99,7 @@ CREATE TABLE product_case (
 );
 
 CREATE TABLE product_power_supply (
-    product_id          SERIAL PRIMARY KEY, 
+    product_id          INT PRIMARY KEY, 
     supported_wattage   INT,
     depth               DECIMAL(5, 2), 
     height              DECIMAL(5, 2),    
@@ -108,7 +108,7 @@ CREATE TABLE product_power_supply (
 );
 
 CREATE TABLE product_gpu (
-    product_id  SERIAL PRIMARY KEY, 
+    product_id  INT PRIMARY KEY, 
     ram_size    INT,         
     clock_speed DECIMAL(5, 2), 
     num_fans    SMALLINT,
@@ -120,14 +120,14 @@ CREATE TABLE product_gpu (
 );
 
 CREATE TABLE product_ssd (
-    product_id  SERIAL PRIMARY KEY, 
+    product_id  INT PRIMARY KEY, 
     capacity    DECIMAL(5, 2), 
     wattage     INT,
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_motherboard (
-    product_id          SERIAL PRIMARY KEY, 
+    product_id          INT PRIMARY KEY, 
     chipset_name        VARCHAR(50),
     num_memory_slots    SMALLINT,
     memory_speed_range  DECIMAL(5, 2),
@@ -513,11 +513,18 @@ CREATE OR REPLACE FUNCTION enforce_apply_discount()
 RETURNS TRIGGER AS $$
 DECLARE
     code_record RECORD;
+    usage INT;
 BEGIN
     SELECT d.usage_count, d.usage_limit, d.expiration_time
     INTO code_record
     FROM discount_code d
     WHERE d.code = NEW.code;
+
+    SELECT COUNT(code)   
+    INTO usage
+    FROM applied_to
+    WHERE code = NEW.code
+    GROUP BY code;
 
     IF code_record IS NULL THEN
         RAISE EXCEPTION 'Invalid discount code.';
@@ -527,7 +534,7 @@ BEGIN
         RAISE EXCEPTION 'The discount code has expired.';
     END IF;
 
-    IF code_record.usage_count >= code_record.usage_limit THEN
+    IF usage >= code_record.usage_limit THEN
         RAISE EXCEPTION 'The usage limit for this discount code has been reached.';
     END IF;
 
@@ -549,7 +556,7 @@ CREATE OR REPLACE FUNCTION deposit()
 RETURNS TRIGGER AS $$
 BEGIN
     UPDATE client
-    SET wallet_balance = wallet_balance + amount
+    SET wallet_balance = wallet_balance + NEW.amount
     WHERE client_id = NEW.client_id;
 
     RETURN NEW;
@@ -689,7 +696,7 @@ $$ LANGUAGE plpgsql;
 
 SELECT cron.schedule(
     '0 0 1 * *', -- Runs at midnight on the 1st of each month
-    'SELECT add_monthly_cashback()'
+    'SELECT add_monthly_cashback();'
 );
 
 
@@ -752,6 +759,7 @@ Job:
 */
 CREATE OR REPLACE FUNCTION handle_subscription_end()
 RETURN VOID AS $$
+DECLARE
     vip_rec RECORD;
 BEGIN
     FOR vip_rec IN
