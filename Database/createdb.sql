@@ -288,7 +288,7 @@ CREATE TABLE added_to (
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
     product_id      INT NOT NULL, 
-    quantity        INT CHECK (quantity > 0),
+    quantity        INT DEFAULT 1  CHECK (quantity > 0),
     cart_price      DECIMAL(12, 2) CHECK (cart_price >= 0),
     PRIMARY KEY (client_id, cart_number, locked_number, product_id),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -813,18 +813,20 @@ DECLARE
     cashback_amount DECIMAL(12,2);
 BEGIN
     FOR vip_client_record IN 
-        SELECT c.client_id, SUM(at.cart_price) * 0.15 AS total_cashback
-        FROM issued_for ifo
-        JOIN transaction t ON ifo.tracking_code = t.tracking_code
-        JOIN added_to adt ON ifo.client_id = adt.client_id AND ifo.cart_number = adt.cart_number AND ifo.locked_number = adt.locked_number
-        JOIN vip_client vc ON ifo.client_id = vc.client_id
+        SELECT c.client_id, COALESCE(SUM(adt.cart_price), 0) * 0.15 AS total_cashback
+        FROM vip_client vc 
+        JOIN issued_for ifo ON vc.client_id = ifo.client_id
+        JOIN transaction t  ON ifo.tracking_code = t.tracking_code
+        JOIN added_to adt   ON ifo.client_id = adt.client_id 
+            AND ifo.cart_number = adt.cart_number 
+            AND ifo.locked_number = adt.locked_number
         WHERE t.transaction_status = 'Successful'
         AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND t.time_stamp < DATE_TRUNC('month', CURRENT_DATE)
         GROUP BY c.client_id
     LOOP
         cashback_amount := vip_client_record.total_cashback;
-        
+
         UPDATE client
         SET wallet_balance = wallet_balance + cashback_amount
         WHERE client_id = vip_client_record.client_id;
@@ -896,30 +898,17 @@ Job:
     (except the first one that all registered users have) should be removed.
 */
 CREATE OR REPLACE FUNCTION handle_subscription_end()
-RETURN VOID AS $$
+RETURNS VOID AS $$
 DECLARE
     vip_rec RECORD;
 BEGIN
-    FOR vip_rec IN
-        SELECT *
-        FROM vip_client
-        WHERE expiration_time < NOW();
-    LOOP
-        -- Block additional carts (cart_number > 1) except locked cart
-        FOR cart_rec IN
-            SELECT cart_number
-            FROM shopping_cart
-            WHERE client_id = vip_rec.client_id
-              AND cart_number > 1  
-              AND cart_status <> 'locked'
-        LOOP
-            UPDATE shopping_cart
-            SET cart_status = 'blocked'
-            WHERE client_id = vip_rec.client_id
-              AND cart_number = cart_rec.cart_number;
-        END LOOP;
-
-    END LOOP;
+    UPDATE shopping_cart
+    SET cart_status = 'blocked'
+    WHERE client_id IN (
+        SELECT client_id FROM vip_client WHERE expiration_time < NOW()
+    )
+    AND cart_number > 1
+    AND cart_status <> 'locked';
 END;
 $$ LANGUAGE plpgsql;
 
