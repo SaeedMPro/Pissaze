@@ -400,14 +400,15 @@ Ensures that:
 CREATE OR REPLACE FUNCTION check_blocked_cart()
 RETURNS TRIGGER AS $$
 DECLARE
-    cart_status cart_status_enum;
+    cart_status_val cart_status_enum;
 BEGIN
     SELECT cart_status
-    INTO cart_status
-    FROM locked_shopping_cart NATURAL JOIN shopping_cart
-    WHERE cart_number = NEW.cart_number;
+    INTO cart_status_val
+    FROM shopping_cart
+    WHERE cart_number = NEW.cart_number 
+      AND client_id = NEW.client_id;
 
-    IF cart_status = 'blocked'THEN
+    IF cart_status_val = 'blocked'THEN
         RAISE EXCEPTION 'Operation not allowed: Cart % is blocked.', NEW.cart_number;
     END IF;
 
