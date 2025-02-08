@@ -439,13 +439,13 @@ Ensures that:
 CREATE OR REPLACE FUNCTION check_product_stock()
 RETURNS TRIGGER AS $$
 DECLARE
-    stock_count SMALLINT;
+    stock_count_val SMALLINT;
 BEGIN
-    SELECT p.stock_count INTO stock_count
-    FROM product p
-    WHERE p.id = NEW.product_id;
+    SELECT stock_count INTO stock_count_val
+    FROM product 
+    WHERE id = NEW.product_id;
 
-    IF stock_count < NEW.quantity THEN
+    IF stock_count_val < NEW.quantity THEN
         RAISE EXCEPTION 
         'Not enough stock available for product_id: %', NEW.product_id;
     END IF;
@@ -488,10 +488,11 @@ Ensures that:
 CREATE OR REPLACE FUNCTION enforce_cart_limit()
 RETURNS TRIGGER AS $$
 DECLARE
-    cart_count INT;
-    is_vip BOOLEAN;
+    cart_count_active   INT;
+    cart_count_total    INT;
+    is_vip              BOOLEAN;
 BEGIN
-    
+
     SELECT EXISTS (
         SELECT 1
         FROM vip_client
@@ -499,18 +500,30 @@ BEGIN
     ) INTO is_vip;
 
     SELECT COUNT(*) 
-    INTO cart_count
+    INTO cart_count_active
     FROM shopping_cart
     WHERE client_id = NEW.client_id
       AND cart_status = 'active';
 
+    SELECT COUNT(*) 
+    INTO cart_count_total
+    FROM shopping_cart
+    WHERE client_id = NEW.client_id;
+
+    -- Restrict total carts for both regular and VIP users
+    IF cart_count_total >= 5 THEN 
+        RAISE EXCEPTION 'users cannot have more than five shopping carts.';
+    END IF;
+
     IF is_vip THEN
-        IF cart_count >= 5 THEN
-            RAISE EXCEPTION 'vip users cannot have more than five shopping carts.';
+        -- VIP users can have up to 5 total carts
+        IF cart_count_active >= 5 THEN
+            RAISE EXCEPTION 'VIP users cannot have more than five active shopping carts.';
         END IF;
     ELSE
-        IF cart_count >= 1 THEN
-            RAISE EXCEPTION 'Registered users cannot have more than one shopping cart.';
+        -- Non-VIP users can have only 1 active cart
+        IF cart_count_active >= 1 THEN
+            RAISE EXCEPTION 'Registered users cannot have more than one active shopping cart.';
         END IF;
     END IF;
 
