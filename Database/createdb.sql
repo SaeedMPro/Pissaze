@@ -140,7 +140,8 @@ CREATE TABLE product_motherboard (
 
 CREATE TABLE compatible_cc_socket (
     cpu_id      INT NOT NULL, 
-    cooler_id   INT NOT NULL, 
+    cooler_id   INT NOT NULL,
+    PRIMARY KEY (cpu_id, cooler_id), 
     FOREIGN KEY (cooler_id) REFERENCES product_cooler (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (cpu_id) REFERENCES product_cpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -148,6 +149,7 @@ CREATE TABLE compatible_cc_socket (
 CREATE TABLE compatible_mc_socket (
     cpu_id          INT NOT NULL, 
     motherboard_id  INT NOT NULL, 
+    PRIMARY KEY (cpu_id, motherboard_id), 
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (cpu_id) REFERENCES product_cpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -155,6 +157,7 @@ CREATE TABLE compatible_mc_socket (
 CREATE TABLE compatible_rm_slot (
     ram_id          INT NOT NULL, 
     motherboard_id  INT NOT NULL, 
+    PRIMARY KEY (ram_id, motherboard_id),
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (ram_id) REFERENCES product_ram_stick (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -162,20 +165,23 @@ CREATE TABLE compatible_rm_slot (
 CREATE TABLE compatible_gp_connector (
     gpu_id          INT NOT NULL, 
     power_supply_id INT NOT NULL, 
+    PRIMARY KEY (gpu_id, power_supply_id),
     FOREIGN KEY (gpu_id) REFERENCES product_gpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (power_supply_id) REFERENCES product_power_supply (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_sm_slot (
     ssd_id          INT NOT NULL, 
-    motherboard_id  INT NOT NULL, 
+    motherboard_id  INT NOT NULL,
+    PRIMARY KEY (ssd_id, motherboard_id), 
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (ssd_id) REFERENCES product_ssd (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_gm_slot (
     gpu_id          INT NOT NULL, 
-    motherboard_id  INT NOT NULL, 
+    motherboard_id  INT NOT NULL,
+    PRIMARY KEY (gpu_id, motherboard_id), 
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (gpu_id) REFERENCES product_gpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -213,9 +219,9 @@ CREATE TABLE shopping_cart (
 );
 
 CREATE TABLE discount_code (
-    code            INT PRIMARY KEY, 
-    amount          DECIMAL(10, 2) CHECK (amount > 0),
-    discount_limit  DECIMAL(5, 2) CHECK (discount_limit > 0),
+    code            SERIAL PRIMARY KEY, 
+    amount          DECIMAL(12, 2) CHECK (amount > 0),
+    discount_limit  DECIMAL(12, 2) CHECK (discount_limit > 0),
     usage_limit     SMALLINT DEFAULT 1 CHECK (usage_limit >= 0) , 
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
@@ -318,49 +324,61 @@ Ensures that:
 CREATE OR REPLACE FUNCTION handle_referral() 
 RETURNS TRIGGER AS $$
 DECLARE
-    referrer_id         VARCHAR(20);
-    referee_id          VARCHAR(20) := NEW.referee_id;
-    current_level       INT := 0;
-    discount_percentage DECIMAL(10, 2);
+    referrer            VARCHAR(20);
+    referee             VARCHAR(20) := NEW.referee_id;
+    current_level       INT := 1;
+    discount_percentage DECIMAL(12, 2);
     new_discount_code   INT;
-    client_id           INT;
+    client_id_val       INT;
 BEGIN
-    SELECT r.referrer_id INTO referrer_id
-    FROM refers r
-    WHERE r.referee_id = referee_id;
+    -- Apply a 50% discount to the **new referee** (first-time user)
+    SELECT client_id INTO client_id_val FROM client WHERE referral_code = referee;
+    
+    INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
+    VALUES (
+        nextval('discount_code_code_seq'), 
+        0.5,  
+        1000000, 
+        NOW() + INTERVAL '1 week', 
+        'private'
+    ) RETURNING code INTO new_discount_code;
+    
+    INSERT INTO private_code (code, client_id, time_stamp)
+    VALUES (new_discount_code, client_id_val, NOW());
 
-    -- Loop through the referral chain
-    WHILE referrer_id IS NOT NULL LOOP
-        CASE current_level
-            WHEN 0 THEN discount_percentage := 50;
-            ELSE discount_percentage := 50 / (2 * current_level);
-        END CASE;
+    SELECT r.referrer_id INTO referrer FROM refers r WHERE r.referee_id = referee;
 
-        SELECT c.client_id INTO client_id
-        FROM client c
-        WHERE referee_id = referral_code;
+    WHILE referrer IS NOT NULL LOOP
+        discount_percentage := 50 / (2 * current_level);
+
+        SELECT client_id INTO client_id_val FROM client WHERE referral_code = referrer;
 
         IF discount_percentage < 1 THEN
-            --fixed discount (discount_percentage < 1%) 
+            -- Fixed discount (50,000 Tomans)
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
-            VALUES (nextval('discount_code_code_seq'), 50000, 50000, NOW() + INTERVAL '1 week', 'private')
-            RETURNING code INTO new_discount_code;
-            --usage_limit (default) = 1
+            VALUES (
+                nextval('discount_code_code_seq'), 
+                50000,  
+                50000,  
+                NOW() + INTERVAL '1 week', 
+                'private'
+            ) RETURNING code INTO new_discount_code;
         ELSE 
-            discount_percentage := discount_percentage / 100 ;
+            -- Percentage-based discount
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
-            VALUES (nextval('discount_code_code_seq'), discount_percentage, 1000000, NOW() + INTERVAL '1 week', 'private')
-            RETURNING code INTO new_discount_code;
-            --usage_limit (default) = 1
+            VALUES (
+                nextval('discount_code_code_seq'), 
+                discount_percentage / 100,  
+                1000000,  
+                NOW() + INTERVAL '1 week', 
+                'private'
+            ) RETURNING code INTO new_discount_code;
         END IF;
 
         INSERT INTO private_code (code, client_id, time_stamp)
-        VALUES (new_discount_code, client_id, NOW());
+        VALUES (new_discount_code, client_id_val, NOW());
 
-        SELECT r.referrer_id , r.referee_id 
-        INTO referrer_id, referee_id
-        FROM refers r
-        WHERE r.referee_id = referrer_id;
+        SELECT r.referrer_id INTO referrer FROM refers r WHERE r.referee_id = referrer;
 
         current_level := current_level + 1;
     END LOOP;
@@ -373,6 +391,7 @@ CREATE TRIGGER referral_trigger
 AFTER INSERT ON refers
 FOR EACH ROW
 EXECUTE FUNCTION handle_referral();
+
 
 /*
 Ensures that:
