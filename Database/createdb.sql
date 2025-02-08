@@ -609,13 +609,15 @@ EXECUTE FUNCTION deposit();
 
 /*
 Ensures that: 
-    By purchasing product or subscriptions using a digital wallet,
+    By subscriptions using a digital wallet,
     the wallet balance of the client  decreases.
+    - for subscribes use default amount = 50,000 tomans
 */
-CREATE OR REPLACE FUNCTION reduce_wallet()
+CREATE OR REPLACE FUNCTION reduce_wallet_subscribes()
 RETURNS TRIGGER AS $$
 DECLARE
-    transaction_type transaction_type_enum;
+    transaction_type    transaction_type_enum;
+    current_balance     DECIMAL(12, 2);
 BEGIN
 
     SELECT transaction_type
@@ -624,9 +626,19 @@ BEGIN
     WHERE tracking_code = NEW.tracking_code;
 
     IF transaction_type = 'wallet' THEN
-        UPDATE client
-        SET wallet_balance = wallet_balance - amount
+        SELECT wallet_balance
+        INTO current_balance
+        FROM client
         WHERE client_id = NEW.client_id;
+
+        IF current_balance >= 50000 THEN
+            UPDATE client
+            SET wallet_balance = wallet_balance - 50000
+            WHERE client_id = NEW.client_id;
+        ELSE
+            RAISE EXCEPTION 
+            'Insufficient funds in wallet for subscription. Required: 50,000, Available: %', current_balance;
+        END IF;
     END IF;
 
     RETURN NEW;
@@ -634,32 +646,115 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER reduce_user_wallet_trigger
-AFTER INSERT ON issued_for
-FOR EACH ROW
-EXECUTE FUNCTION reduce_wallet();
-
-CREATE TRIGGER reduce_user_wallet_trigger
 AFTER INSERT ON subscribes
 FOR EACH ROW
-EXECUTE FUNCTION reduce_wallet();
+EXECUTE FUNCTION reduce_wallet_subscribes();
+
+/*
+Ensures that: 
+    When a subscription is made using a digital wallet, 
+    the client's wallet balance is reduced accordingly.
+    - Verifies transaction type before processing.
+    - Applies discounts with proper limits.
+    - Ensures sufficient wallet balance before deduction.
+    - Raises an exception if funds are insufficient.
+*/
+CREATE OR REPLACE FUNCTION reduce_wallet_subscribes()
+RETURNS TRIGGER AS $$
+DECLARE
+    transaction_type_val    transaction_type_enum; 
+    current_balance         DECIMAL(12, 2);       
+    total_amount            DECIMAL(12, 2) := 0;   
+    discount_amount         DECIMAL(12, 2) := 0;  
+    limit_value             DECIMAL(12, 2);        
+    discount_code           INT;                   
+BEGIN
+    SELECT t.transaction_type
+    INTO transaction_type_val
+    FROM transaction t
+    WHERE t.tracking_code = NEW.tracking_code;
+
+    IF transaction_type_val = 'wallet' THEN
+
+        SELECT c.wallet_balance
+        INTO current_balance
+        FROM client c
+        WHERE c.client_id = NEW.client_id;
+
+        SELECT COALESCE(SUM(a.cart_price), 0) 
+        INTO total_amount
+        FROM added_to a
+        WHERE a.client_id = NEW.client_id
+          AND a.cart_number = NEW.cart_number
+          AND a.locked_number = NEW.locked_number;
+
+        SELECT a.code
+        INTO discount_code
+        FROM applied_to a 
+        WHERE a.client_id = NEW.client_id
+          AND a.cart_number = NEW.cart_number
+          AND a.locked_number = NEW.locked_number;
+
+        IF discount_code IS NOT NULL THEN
+            SELECT amount, discount_limit
+            INTO discount_amount, limit_value
+            FROM discount_code
+            WHERE code = discount_code;
+
+            -- Apply discount: Percentage-based or Fixed Amount
+            IF discount_amount <= 1 THEN  
+                IF (total_amount * discount_amount) > limit_value THEN
+                    total_amount := total_amount - limit_value;  -- Apply max discount limit
+                ELSE
+                    total_amount := total_amount - (total_amount * discount_amount); -- Apply percentage discount
+                END IF;
+            ELSE  
+                total_amount := total_amount - discount_amount;
+            END IF; 
+
+            -- Ensure the total amount does not go below zero
+            IF total_amount < 0 THEN
+                total_amount := 0;
+            END IF;
+        END IF;
+
+        -- Check if the client has enough balance in the wallet
+        IF current_balance >= total_amount THEN
+            UPDATE client
+            SET wallet_balance = wallet_balance - total_amount
+            WHERE client_id = NEW.client_id;
+        ELSE
+            RAISE EXCEPTION 'Insufficient funds in wallet. Required: %, Available: %', total_amount, current_balance;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reduce_user_wallet_order_trigger
+AFTER INSERT ON issued_for
+FOR EACH ROW
+EXECUTE FUNCTION reduce_wallet_subscribes();
 
 
 /*
 Ensures that:
-    - when an order is finalized and paid, the associated cart is unlocked.
+    - When an order is finalized and paid, the associated cart is unlocked.
     - If the user's subscription has expired and the shopping cart is locked,
-        the cart will be blocked after finalizing.
+      the cart will be blocked after finalizing (except for cart_number = 1).
 */
 CREATE OR REPLACE FUNCTION unlock_cart_after_payment()
 RETURNS TRIGGER AS $$
 DECLARE
-    is_vip_expired BOOLEAN;
+    is_vip_expired BOOLEAN := FALSE;
 BEGIN
-    SELECT (v.expiration_time < NOW()) INTO is_vip_expired
+    SELECT (v.expiration_time < NOW()) 
+    INTO is_vip_expired
     FROM vip_client v
     WHERE v.client_id = NEW.client_id;
 
-    IF is_vip_expired THEN
+    IF is_vip_expired AND NEW.cart_number <> 1 THEN
         UPDATE shopping_cart
         SET cart_status = 'blocked'
         WHERE client_id = NEW.client_id
@@ -674,6 +769,11 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER unlock_cart_trigger
+AFTER INSERT ON issued_for
+FOR EACH ROW
+EXECUTE FUNCTION unlock_cart_after_payment();
 
 
 /*
