@@ -545,7 +545,7 @@ Ensures that:
 CREATE OR REPLACE FUNCTION enforce_apply_discount()
 RETURNS TRIGGER AS $$
 DECLARE
-    code_record RECORD;
+    code_record RECORD := NULL;
     usage INT;
 BEGIN
     SELECT d.usage_count, d.usage_limit, d.expiration_time
@@ -553,15 +553,15 @@ BEGIN
     FROM discount_code d
     WHERE d.code = NEW.code;
 
+    IF code_record IS NULL THEN
+        RAISE EXCEPTION 'Invalid discount code.';
+    END IF;
+
     SELECT COUNT(code)   
     INTO usage
     FROM applied_to
     WHERE code = NEW.code
     GROUP BY code;
-
-    IF code_record IS NULL THEN
-        RAISE EXCEPTION 'Invalid discount code.';
-    END IF;
 
     IF code_record.expiration_time < NOW() THEN
         RAISE EXCEPTION 'The discount code has expired.';
@@ -588,6 +588,11 @@ Ensures that:
 CREATE OR REPLACE FUNCTION deposit()
 RETURNS TRIGGER AS $$
 BEGIN
+
+    IF NEW.amount <= 0 THEN
+        RAISE EXCEPTION 'Deposit amount must be positive.';
+    END IF;
+
     UPDATE client
     SET wallet_balance = wallet_balance + NEW.amount
     WHERE client_id = NEW.client_id;
