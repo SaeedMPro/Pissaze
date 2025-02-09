@@ -688,34 +688,29 @@ BEGIN
           AND a.cart_number = NEW.cart_number
           AND a.locked_number = NEW.locked_number;
 
-        SELECT a.code
-        INTO discount_code
-        FROM applied_to a 
-        WHERE a.client_id = NEW.client_id
-          AND a.cart_number = NEW.cart_number
-          AND a.locked_number = NEW.locked_number;
-
-        IF discount_code IS NOT NULL THEN
-            SELECT amount, discount_limit
-            INTO discount_amount, limit_value
-            FROM discount_code
-            WHERE code = discount_code;
-
+        -- Process all discount codes applied to this order
+        FOR discount_code, discount_amount, limit_value IN 
+            SELECT a.code, d.amount, d.discount_limit
+            FROM applied_to a
+            JOIN discount_code d ON a.code = d.code
+            WHERE a.client_id = NEW.client_id
+              AND a.cart_number = NEW.cart_number
+              AND a.locked_number = NEW.locked_number
+        LOOP
             -- Apply discount: Percentage-based or Fixed Amount
             IF discount_amount <= 1 THEN  
                 IF (total_amount * discount_amount) > limit_value THEN
-                    total_amount := total_amount - limit_value;  -- Apply max discount limit
+                    total_amount := total_amount - limit_value;  
                 ELSE
-                    total_amount := total_amount - (total_amount * discount_amount); -- Apply percentage discount
+                    total_amount := total_amount - (total_amount * discount_amount); 
                 END IF;
             ELSE  
                 total_amount := total_amount - discount_amount;
             END IF; 
+        END LOOP;
 
-            -- Ensure the total amount does not go below zero
-            IF total_amount < 0 THEN
-                total_amount := 0;
-            END IF;
+        IF total_amount < 0 THEN
+            total_amount := 0;
         END IF;
 
         -- Check if the client has enough balance in the wallet
