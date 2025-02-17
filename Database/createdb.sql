@@ -659,7 +659,7 @@ Ensures that:
     - Ensures sufficient wallet balance before deduction.
     - Raises an exception if funds are insufficient.
 */
-CREATE OR REPLACE FUNCTION reduce_wallet_subscribes()
+CREATE OR REPLACE FUNCTION reduce_wallet_order()
 RETURNS TRIGGER AS $$
 DECLARE
     transaction_type_val    transaction_type_enum; 
@@ -730,7 +730,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER reduce_user_wallet_order_trigger
 AFTER INSERT ON issued_for
 FOR EACH ROW
-EXECUTE FUNCTION reduce_wallet_subscribes();
+EXECUTE FUNCTION reduce_wallet_order();
 
 
 /*
