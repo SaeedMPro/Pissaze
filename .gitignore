@@ -3,3 +3,52 @@
 
 # Ignore Visual Studio Code settings directory
 .vscode/
+
+# Ignore Go build artifacts
+bin/
+dist/
+*.exe
+*.test
+*.out
+
+# Ignore Go module files
+go.sum
+go.mod
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore environment files
+.env
+.env.local
+
+# Ignore log files
+*.log
+
+# Ignore binary files
+*.bin
+
+# Ignore coverage files
+coverage.txt
+coverage.out
+
+# Ignore dependency directories
+vendor/
+node_modules/
+
+# Ignore debug files
+debug
+*.debug
+
+# Ignore Swagger-generated files
+docs/swagger.json
+docs/swagger.yaml
+
+# Ignore local development files
+local/
+tmp/
