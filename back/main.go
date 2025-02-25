@@ -1,6 +1,6 @@
 package main
 
-import "pisaz/internal/storage"
+import "github.com/pissaze/internal/storage"
 
 func main(){
 	err := storage.InitDB()

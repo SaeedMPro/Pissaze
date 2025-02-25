@@ -24,10 +24,10 @@ func InitDB() error {
 	dbPass := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 
-	conectionInfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+	connectionInfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 	dbHost, dbUser, dbPass, dbName, dbPort)
 
-	db ,err := sql.Open("postgres" , conectionInfo)
+	db ,err := sql.Open("postgres" , connectionInfo)
 
 	if err != nil {
 		return err
