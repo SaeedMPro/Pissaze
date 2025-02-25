@@ -11,11 +11,12 @@ import (
 )
 
 var dataBase *sql.DB
-func InitDB() error {
+func init(){
+	fmt.Println("connecting to database...")
 	err := godotenv.Load()
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -30,17 +31,17 @@ func InitDB() error {
 	db ,err := sql.Open("postgres" , connectionInfo)
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	err = db.Ping()
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	dataBase = db
-	return nil
+	fmt.Println("connected to database")
 }
 
 func GetDB()(*sql.DB , error){
