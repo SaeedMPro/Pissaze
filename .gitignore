@@ -11,10 +11,6 @@ dist/
 *.test
 *.out
 
-# Ignore Go module files
-go.sum
-go.mod
-
 # Ignore IDE-specific files
 .idea/
 *.iml
