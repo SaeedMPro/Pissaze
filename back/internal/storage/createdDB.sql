@@ -38,12 +38,12 @@ CREATE TABLE product (
 
 CREATE TABLE product_hdd (
     product_id          INT PRIMARY KEY, 
-    capacity            DECIMAL(5, 2),          
+    capacity            DECIMAL(10, 2),          
     rotational_speed    INT,  
     wattage             INT,           
-    depth               DECIMAL(5, 2), 
-    height              DECIMAL(5, 2),    
-    width               DECIMAL(5, 2),
+    depth               DECIMAL(10, 2), 
+    height              DECIMAL(10, 2),    
+    width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -53,9 +53,9 @@ CREATE TABLE product_cooler (
     fan_size                INT,              
     max_rotational_speed    INT,  
     wattage                 INT,               
-    depth                   DECIMAL(5, 2), 
-    height                  DECIMAL(5, 2),    
-    width                   DECIMAL(5, 2),    
+    depth                   DECIMAL(10, 2), 
+    height                  DECIMAL(10, 2),    
+    width                   DECIMAL(10, 2),    
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -65,8 +65,8 @@ CREATE TABLE product_cpu (
     microarchitecture   VARCHAR(50),
     num_cores           SMALLINT,
     num_threads         SMALLINT,
-    base_frequency      DECIMAL(5, 2), 
-    boost_frequency     DECIMAL(5, 2),
+    base_frequency      DECIMAL(10, 2), 
+    boost_frequency     DECIMAL(10, 2),
     max_memory_limit    INT,         
     wattage             INT,                
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -75,12 +75,12 @@ CREATE TABLE product_cpu (
 CREATE TABLE product_ram_stick (
     product_id  INT PRIMARY KEY, 
     generation  VARCHAR(50),
-    capacity    DECIMAL(5, 2),    
-    frequency   DECIMAL(5, 2),   
+    capacity    DECIMAL(10, 2),    
+    frequency   DECIMAL(10, 2),   
     wattage     INT, 
-    depth       DECIMAL(5, 2), 
-    height      DECIMAL(5, 2),    
-    width       DECIMAL(5, 2),   
+    depth       DECIMAL(10, 2), 
+    height      DECIMAL(10, 2),    
+    width       DECIMAL(10, 2),   
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -92,36 +92,36 @@ CREATE TABLE product_case (
     fan_size        INT,         
     num_fans        SMALLINT,
     wattage         INT,
-    depth           DECIMAL(5, 2), 
-    height          DECIMAL(5, 2),    
-    width           DECIMAL(5, 2),
+    depth           DECIMAL(10, 2), 
+    height          DECIMAL(10, 2),    
+    width           DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_power_supply (
     product_id          INT PRIMARY KEY, 
     supported_wattage   INT,
-    depth               DECIMAL(5, 2), 
-    height              DECIMAL(5, 2),    
-    width               DECIMAL(5, 2),
+    depth               DECIMAL(10, 2), 
+    height              DECIMAL(10, 2),    
+    width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_gpu (
     product_id  INT PRIMARY KEY, 
     ram_size    INT,         
-    clock_speed DECIMAL(5, 2), 
+    clock_speed DECIMAL(10, 2), 
     num_fans    SMALLINT,
     wattage     INT,
-    depth       DECIMAL(5, 2), 
-    height      DECIMAL(5, 2),    
-    width       DECIMAL(5, 2),
+    depth       DECIMAL(10, 2), 
+    height      DECIMAL(10, 2),    
+    width       DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_ssd (
     product_id  INT PRIMARY KEY, 
-    capacity    DECIMAL(5, 2), 
+    capacity    DECIMAL(10, 2), 
     wattage     INT,
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -130,11 +130,11 @@ CREATE TABLE product_motherboard (
     product_id          INT PRIMARY KEY, 
     chipset_name        VARCHAR(50),
     num_memory_slots    SMALLINT,
-    memory_speed_range  DECIMAL(5, 2),
+    memory_speed_range  DECIMAL(10, 2),
     wattage             INT,
-    depth               DECIMAL(5, 2), 
-    height              DECIMAL(5, 2),    
-    width               DECIMAL(5, 2),
+    depth               DECIMAL(10, 2), 
+    height              DECIMAL(10, 2),    
+    width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
@@ -548,20 +548,20 @@ DECLARE
     code_record RECORD := NULL;
     usage INT;
 BEGIN
-    SELECT d.usage_count, d.usage_limit, d.expiration_time
+    SELECT d.usage_limit, d.usage_limit, d.expiration_time
     INTO code_record
     FROM discount_code d
-    WHERE d.code = NEW.code;
+    WHERE d.code = NEW.discount_code;
 
     IF code_record IS NULL THEN
         RAISE EXCEPTION 'Invalid discount code.';
     END IF;
 
-    SELECT COUNT(code)   
+    SELECT COUNT(discount_code)   
     INTO usage
     FROM applied_to
-    WHERE code = NEW.code
-    GROUP BY code;
+    WHERE discount_code = NEW.discount_code
+    GROUP BY discount_code;
 
     IF code_record.expiration_time < NOW() THEN
         RAISE EXCEPTION 'The discount code has expired.';
@@ -690,9 +690,9 @@ BEGIN
 
         -- Process all discount codes applied to this order
         FOR discount_code, discount_amount, limit_value IN 
-            SELECT a.code, d.amount, d.discount_limit
+            SELECT a.discount_code, d.amount, d.discount_limit
             FROM applied_to a
-            JOIN discount_code d ON a.code = d.code
+            JOIN discount_code d ON a.discount_code = d.code
             WHERE a.client_id = NEW.client_id
               AND a.cart_number = NEW.cart_number
               AND a.locked_number = NEW.locked_number
