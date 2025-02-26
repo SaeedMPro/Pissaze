@@ -1,6 +1,12 @@
 package server
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pissaze/internal/dto"
+	"github.com/pissaze/internal/service"
+)
 
 // /
 // /api/login
@@ -8,24 +14,48 @@ import "github.com/gin-gonic/gin"
 // /api/client/discountcode -- blue
 // /api/client/cart  -- red
 
-func registerClientRoutes(r *gin.Engine){
+func registerClientRoutes(r *gin.Engine) {
 
-	group := r.Group("api/client")
+	group := r.Group("/api/client")
 
-	group.GET("/",getInfo)
-	group.GET("/discountcode",getDiscounds)
-	group.GET("/cart",getCart)
+	group.GET("/", getInfo)
+	group.GET("/discountcode", getDiscounds)
+	group.GET("/cart", getCart)
 }
 
-func getInfo(c *gin.Context){
+// api/client/
+func getInfo(c *gin.Context) {
+
+	var req dto.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.APIResponse{
+			Success: false,
+			Error:   "Invalid request format",
+		})
+		return
+	}
+
+	client, err := service.GetClientByPhoneNumber(req.PhoneNumber)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.APIResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.APIResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    client,
+	})
+}
+
+func getDiscounds(c *gin.Context) {
 
 }
 
-func getDiscounds(c *gin.Context){
+func getCart(c *gin.Context) {
 
 }
-
-func getCart(c *gin.Context){
-
-}
-
