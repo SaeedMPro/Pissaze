@@ -1,20 +1,22 @@
 package models
 
-import "time"
+type ProductInterface interface {
+	GetType() string
+}
 
 type Product struct {
-	ID           int       `json:"id" db:"id"`
-	Brand        string    `json:"brand" db:"brand"`
-	Model        string    `json:"model" db:"model"`
-	CurrentPrice int       `json:"current_price" db:"current_price"`
-	StockCount   int       `json:"stock_count" db:"stock_count"`
-	Category     string    `json:"category" db:"category"`
-	ProductImage []byte    `json:"product_image" db:"product_image"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	ID           int    `json:"id" db:"id"`
+	Brand        string `json:"brand" db:"brand"`
+	Model        string `json:"model" db:"model"`
+	CurrentPrice int    `json:"current_price" db:"current_price"`
+	StockCount   int    `json:"stock_count" db:"stock_count"`
+	Category     string `json:"category" db:"category"`
+	ProductImage []byte `json:"product_image" db:"product_image"`
 }
 
 type ProductHDD struct {
 	Product
+	ProductInterface 
 	Capacity         float64 `json:"capacity" db:"capacity"`
 	RotationalSpeed  int     `json:"rotational_speed" db:"rotational_speed"`
 	Wattage          int     `json:"wattage" db:"wattage"`
@@ -25,13 +27,13 @@ type ProductHDD struct {
 
 type ProductCooler struct {
 	Product
-	CoolingMethod       CoolingMethodEnum `json:"cooling_method" db:"cooling_method"`
-	FanSize             int               `json:"fan_size" db:"fan_size"`
-	MaxRotationalSpeed  int               `json:"max_rotational_speed" db:"max_rotational_speed"`
-	Wattage             int               `json:"wattage" db:"wattage"`
-	Depth               float64           `json:"depth" db:"depth"`
-	Height              float64           `json:"height" db:"height"`
-	Width               float64           `json:"width" db:"width"`
+	CoolingMethod      CoolingMethodEnum `json:"cooling_method" db:"cooling_method"`
+	FanSize            int               `json:"fan_size" db:"fan_size"`
+	MaxRotationalSpeed int               `json:"max_rotational_speed" db:"max_rotational_speed"`
+	Wattage            int               `json:"wattage" db:"wattage"`
+	Depth              float64           `json:"depth" db:"depth"`
+	Height             float64           `json:"height" db:"height"`
+	Width              float64           `json:"width" db:"width"`
 }
 
 type ProductCPU struct {
@@ -97,11 +99,21 @@ type ProductSSD struct {
 
 type ProductMotherboard struct {
 	Product
-	ChipsetName       string  `json:"chipset_name" db:"chipset_name"`
-	NumMemorySlots    int     `json:"num_memory_slots" db:"num_memory_slots"`
-	MemorySpeedRange  float64 `json:"memory_speed_range" db:"memory_speed_range"`
-	Wattage           int     `json:"wattage" db:"wattage"`
-	Depth             float64 `json:"depth" db:"depth"`
-	Height            float64 `json:"height" db:"height"`
-	Width             float64 `json:"width" db:"width"`
+	ChipsetName      string  `json:"chipset_name" db:"chipset_name"`
+	NumMemorySlots   int     `json:"num_memory_slots" db:"num_memory_slots"`
+	MemorySpeedRange float64 `json:"memory_speed_range" db:"memory_speed_range"`
+	Wattage          int     `json:"wattage" db:"wattage"`
+	Depth            float64 `json:"depth" db:"depth"`
+	Height           float64 `json:"height" db:"height"`
+	Width            float64 `json:"width" db:"width"`
 }
+
+func (p ProductCPU) GetType() string         { return "cpu" }
+func (p ProductCooler) GetType() string      { return "cooler" }
+func (p ProductHDD) GetType() string         { return "hdd" }
+func (p ProductCase) GetType() string        { return "case" }
+func (p ProductGPU) GetType() string         { return "gpu" }
+func (p ProductMotherboard) GetType() string { return "motherboard" }
+func (p ProductSSD) GetType() string         { return "ssd" }
+func (p ProductPowerSupply) GetType() string { return "power-suply" }
+func (p ProductRAMStick) GetType() string    { return "ram" }
