@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pissaze/internal/server/client"
 )
 
 const (
@@ -19,5 +18,5 @@ func Start() {
 }
 
 func registerRoutes(r *gin.Engine) {
-	client.RegisterRoutes(r)
+	registerClientRoutes(r)
 }

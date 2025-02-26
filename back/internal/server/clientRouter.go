@@ -1,4 +1,4 @@
-package client
+package server
 
 import "github.com/gin-gonic/gin"
 
@@ -8,7 +8,7 @@ import "github.com/gin-gonic/gin"
 // /api/client/discountcode -- blue
 // /api/client/cart  -- red
 
-func RegisterRoutes(r *gin.Engine){
+func registerClientRoutes(r *gin.Engine){
 
 	group := r.Group("api/client")
 
