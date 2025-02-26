@@ -12,7 +12,7 @@ import (
 
 func init(){
 	fmt.Println("Start adding users and addresses")
-	//inputDataset()
+	//inputDatasetClients()
 	fmt.Println("All users and addresses added successfully!")
 }
 
@@ -126,7 +126,7 @@ func InsertVIPClient(vip models.VIPClient) error {
 }
 
 
-func inputDataset() {
+func inputDatasetClients() {
 
 	users := []models.Client{
 		{PhoneNumber: "1001", FirstName: "Navid", LastName: "khan", ReferralCode: "NAVID123"},
