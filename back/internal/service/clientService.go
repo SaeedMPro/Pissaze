@@ -1,29 +1,36 @@
 package service
 
+import (
+	"errors"
 
-// func Insert(client *client.ClientAbstract)(id int,err error){
-// 	//TODO:
+	"github.com/pissaze/internal/models"
+	"github.com/pissaze/internal/repositories"
+)
+
+// GetClientByPhoneNumber fetches a client by phone number, including VIP status and addresses
+func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	
-// 	return 
-// }
+	if phoneNumber == "" {
+		return nil, errors.New("phone number is required")
+	}
 
-// func Get(id int)(client *client.ClientAbstract, err error){
-// 	//TODO:
-// 	return
-// }
+	client, err := repositories.GetClientByPhoneNumber(phoneNumber)
+	if err != nil {
+		return nil, err
+	}
 
-// func Update(client *client.ClientAbstract)(err error){
-// 	//TODO:
-// 	return
-// }
+	client.Addresses, err = repositories.GetClientAddressByClientID(client.ClientID)
+	if err != nil {
+		return nil, err
+	}
 
-// func Delete(id int)(err error){
-// 	//TODO:
-// 	return
-// }
+	clientVIP, err := repositories.GetVIPClientByID(client.ClientID)
+	if err != nil {
+		return nil, err
+	}else if clientVIP != nil{
+		clientVIP.Client = *client
+		return clientVIP, nil
+	}
 
-// ----- validators -----
-// func validate(client *client.ClientAbstract)(err error){
-// 	//TODO:
-// 	return
-// }
+	return client, nil
+}
