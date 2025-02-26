@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"os"
 
@@ -44,9 +43,6 @@ func init(){
 	fmt.Println("connected to database")
 }
 
-func GetDB()(*sql.DB , error){
-	if dataBase == nil {
-		return nil , errors.New("pointer is null")
-	}
-	return dataBase , nil
+func GetDB()(*sql.DB ){
+	return dataBase
 }
