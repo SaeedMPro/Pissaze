@@ -19,4 +19,5 @@ func Start() {
 
 func registerRoutes(r *gin.Engine) {
 	registerClientRoutes(r)
+	registerProductRoutes(r)
 }

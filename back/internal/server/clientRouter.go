@@ -15,7 +15,6 @@ import (
 // /api/client/cart  -- red
 
 func registerClientRoutes(r *gin.Engine) {
-
 	group := r.Group("/api/client")
 
 	group.GET("/", getInfo)
