@@ -12,6 +12,7 @@ This file contains useful links, tips, and code snippets for each topic I learn 
 
 ## Git & Github
 - [Best Git Practices For Managing Your Project](https://patrykkosieradzki.medium.com/best-git-practices-for-managing-your-project-60db33b44830)
+- [Best Practices for Git ](https://dev.to/sheraz4194/good-commit-vs-bad-commit-best-practices-for-git-1plc)
 
 ## Swagger
 - [Swagger for Go REST APIs: Quick & Easy Documentation with Gin ](https://www.youtube.com/watch?v=0b_N4y8_9iI)
