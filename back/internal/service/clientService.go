@@ -7,7 +7,6 @@ import (
 	"github.com/pissaze/internal/repositories"
 )
 
-// GetClientByPhoneNumber fetches a client by phone number, including VIP status and addresses
 func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	
 	if phoneNumber == "" {
