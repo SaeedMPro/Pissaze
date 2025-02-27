@@ -182,7 +182,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8082",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Pisaz",
+	Title:            "Pissaze",
 	Description:      "API for managing products, and users in a hardware shopping site.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
