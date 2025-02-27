@@ -10,9 +10,9 @@ import (
 
 // /
 // /api/login
-// /api/client/  --black
-// /api/client/discountCode -- blue
-// /api/client/cart  -- red
+// /api/client/  
+// /api/client/discountCode 
+// /api/client/cart  
 
 func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
