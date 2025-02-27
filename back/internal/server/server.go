@@ -41,6 +41,7 @@ func Start() {
 
 func registerRoutes(r *gin.Engine) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	registerLoginRouter(r)
 	registerClientRoutes(r)
 	registerProductRoutes(r)
 }
