@@ -26,3 +26,6 @@ This file contains useful links, tips, and code snippets for each topic I learn 
 
 ##  Middlewares
 - [Custom Middlewares in Go gin project](https://medium.com/nerd-for-tech/custom-middlewares-in-go-gin-4a7408e4d472)
+
+## Cores
+- [gin cors](https://github.com/gin-contrib/cors)
