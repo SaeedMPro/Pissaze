@@ -15,6 +15,7 @@ func registerProductRoutes(r *gin.Engine) {
 	group := r.Group("/api/product")
 
 	group.GET("/list", getList)
+	group.POST("/compatible", getCompatibleWithProductsList)
 }
 
 func getList(c *gin.Context) {
@@ -63,4 +64,8 @@ func getList(c *gin.Context) {
 		Message: "Products retrieved successfully",
 		Data:    list,
 	})
+}
+
+func getCompatibleWithProductsList(c *gin.Context) {
+	//TODO
 }
