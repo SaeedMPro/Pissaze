@@ -1,4 +1,111 @@
+definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  dto.LoginRequest:
+    properties:
+      phone_number:
+        type: string
+    required:
+    - phone_number
+    type: object
+  dto.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        example: message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  models.AddressOfClient:
+    properties:
+      client_id:
+        type: integer
+      province:
+        type: string
+      remain_address:
+        type: string
+    type: object
+  models.Client:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/models.AddressOfClient'
+        type: array
+      client_id:
+        type: integer
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      referral_code:
+        type: string
+      timestamp:
+        type: string
+      wallet_balance:
+        type: number
+    type: object
+  models.VIPClient:
+    properties:
+      client:
+        $ref: '#/definitions/models.Client'
+      expiration_time:
+        type: string
+    type: object
+host: localhost:8082
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: dan
+    name: Saeed, Danny
+  description: API for managing products, and users in a hardware shopping site.
+  title: Pisaz
+  version: "1.0"
+paths:
+  /api/client/:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve client details using their phone number. The phone number
+        is provided in the request body. The response may include either a `Client`
+        or a `VIPClient` object in the `data` field.
+      parameters:
+      - description: phone_number
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: VIP client retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.VIPClient'
+              type: object
+        "404":
+          description: Client not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get client information by phone number
+      tags:
+      - client
 swagger: "2.0"
