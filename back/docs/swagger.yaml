@@ -1,3 +1,4 @@
+basePath: /api
 definitions:
   dto.ErrorResponse:
     properties:
@@ -65,14 +66,14 @@ definitions:
 host: localhost:8082
 info:
   contact:
-    email: mzahry36@gmail.com, Dankeshavarz1075@gmail.com
+    email: mzahry36@gmail.com, dankeshavarz1075@gmail.com
     name: Saeed, Danny
   description: API for managing products, and users in a hardware shopping site.
   title: Pissaze
   version: "1.0"
 paths:
   /api/client/:
-    post:
+    get:
       consumes:
       - application/json
       description: Retrieve client details using their phone number. The phone number

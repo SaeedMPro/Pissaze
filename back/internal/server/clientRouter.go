@@ -17,7 +17,7 @@ import (
 func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
 
-	group.POST("/", getInfo)
+	group.GET("/", getInfo)
 	group.GET("/discountCode", getDiscounts)
 	group.GET("/cart", getCart)
 }
@@ -33,7 +33,7 @@ func registerClientRoutes(r *gin.Engine) {
 // @Success 200 {object} dto.SuccessResponse{data=models.VIPClient} "VIP client retrieved successfully"
 // @Failure 404 {object} dto.ErrorResponse "Client not found" 
 // @Failure 500 {object} dto.ErrorResponse "Internal server error"
-// @Router /api/client/ [POST]
+// @Router /api/client/ [GET]
 func getInfo(c *gin.Context) {
 	
 	var req dto.LoginRequest

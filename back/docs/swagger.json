@@ -5,14 +5,15 @@
         "title": "Pissaze",
         "contact": {
             "name": "Saeed, Danny",
-            "email": "mzahry36@gmail.com, Dankeshavarz1075@gmail.com"
+            "email": "mzahry36@gmail.com, dankeshavarz1075@gmail.com"
         },
         "version": "1.0"
     },
     "host": "localhost:8082",
+    "basePath": "/api",
     "paths": {
         "/api/client/": {
-            "post": {
+            "get": {
                 "description": "Retrieve client details using their phone number. The phone number is provided in the request body. The response may include either a `Client` or a `VIPClient` object in the `data` field.",
                 "consumes": [
                     "application/json"

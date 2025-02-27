@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Saeed, Danny",
-            "email": "mzahry36@gmail.com, Dankeshavarz1075@gmail.com"
+            "email": "mzahry36@gmail.com, dankeshavarz1075@gmail.com"
         },
         "version": "{{.Version}}"
     },
@@ -19,7 +19,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/client/": {
-            "post": {
+            "get": {
                 "description": "Retrieve client details using their phone number. The phone number is provided in the request body. The response may include either a ` + "`" + `Client` + "`" + ` or a ` + "`" + `VIPClient` + "`" + ` object in the ` + "`" + `data` + "`" + ` field.",
                 "consumes": [
                     "application/json"
@@ -180,7 +180,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8082",
-	BasePath:         "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Pissaze",
 	Description:      "API for managing products, and users in a hardware shopping site.",
