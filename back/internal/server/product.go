@@ -24,7 +24,7 @@ func getList(c *gin.Context) {
 
 	cpus, err := service.GetAllCPU()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.APIResponse{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
 			Error:   err.Error(),
 		})
@@ -36,7 +36,7 @@ func getList(c *gin.Context) {
 
 	hhds, err := service.GetAllHDD()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.APIResponse{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
 			Error:   err.Error(),
 		})
@@ -48,7 +48,7 @@ func getList(c *gin.Context) {
 
 	coolers, err := service.GetAllCooler()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.APIResponse{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
 			Error:   err.Error(),
 		})
@@ -58,7 +58,7 @@ func getList(c *gin.Context) {
 		list = append(list, tmp)
 	}
 
-	c.JSON(http.StatusOK, dto.APIResponse{
+	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "Products retrieved successfully",
 		Data:    list,
