@@ -63,7 +63,7 @@ func getInfo(c *gin.Context) {
 }
 
 func getDiscounts(c *gin.Context) {
-
+	
 }
 
 func getCart(c *gin.Context) {

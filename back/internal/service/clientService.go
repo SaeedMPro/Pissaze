@@ -33,3 +33,11 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 
 	return client, nil
 }
+
+func FindUserDiscountCodeCount(client *models.ClientAbstract)(int,error){
+	return 0,nil
+}
+
+func GetUserDiscountCode(client *models.ClientAbstract)([]models.DiscountCodeInterface,error){
+	return nil, nil
+}

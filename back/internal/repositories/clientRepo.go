@@ -125,7 +125,6 @@ func InsertVIPClient(vip models.VIPClient) error {
 	return err
 }
 
-
 func inputDatasetClients() {
 
 	users := []models.Client{
