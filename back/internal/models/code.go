@@ -2,6 +2,11 @@ package models
 
 import "time"
 
+type DiscountCodeInterface interface{
+	IsPrivate()
+	GetDiscount()
+}
+
 type DiscountCode struct {
 	Code           int          `json:"code" db:"code"`
 	Amount         float64      `json:"amount" db:"amount"`
@@ -12,7 +17,13 @@ type DiscountCode struct {
 }
 
 type PrivateCode struct {
-	Code      int       `json:"code" db:"code"`
+	DiscountCode
 	ClientID  int       `json:"client_id" db:"client_id"`
 	Timestamp time.Time `json:"timestamp" db:"time_stamp"`
 }
+
+func(d *DiscountCode)IsPrivate() bool{return false}
+func(d *DiscountCode)GetDiscount() *DiscountCode{return d}
+
+func(p *PrivateCode)IsPrivate() bool{return true}
+func(p *PrivateCode)GetDiscount() *DiscountCode{return &p.DiscountCode}
