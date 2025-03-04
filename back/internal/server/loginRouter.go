@@ -34,7 +34,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	token,err := service.GentateTokenStr(&client)
+	token,err := service.GenerateTokenStr(&client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -44,7 +44,7 @@ func login(c *gin.Context) {
 	}
 
 
-	c.JSON(http.StatusInternalServerError, dto.SuccessResponse{
+	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: false,
 		Data: dto.LoginRespons{
 			IsVip: client.IsVIP(),

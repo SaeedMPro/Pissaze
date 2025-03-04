@@ -5,18 +5,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
+	"github.com/pissaze/internal/middleware"
 	"github.com/pissaze/internal/service"
 )
 
 // /
 // /api/login
-// /api/client/  
-// /api/client/discountCode 
-// /api/client/cart  
+// /api/client/
+// /api/client/discountCode
+// /api/client/cart
 
 func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
-
+	group.Use(middleware.Auth())
 	group.GET("/", getInfo)
 	group.GET("/discountCode", getDiscounts)
 	group.GET("/cart", getCart)
