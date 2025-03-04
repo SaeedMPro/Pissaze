@@ -38,4 +38,6 @@ func FindUserDiscountCodeCount(client *models.ClientAbstract)(int,error){
 	return 0,nil
 }
 
-func GetUserDiscountCode(client *models.ClientAbstract)
+func GetUserDiscountCode(client *models.ClientAbstract)([]models.DiscountCodeInterface,error){
+	return nil, nil
+}
