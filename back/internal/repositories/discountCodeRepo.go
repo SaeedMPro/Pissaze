@@ -54,7 +54,7 @@ func GetAllDiscountCodeNotExpired() ([]models.DiscountCodeInterface, error) {
 	return discountCodes, nil
 }
 
-func GetPrivateCodesWithLessThenOneWeekByClientID(clientID int) ([]models.PrivateCode, error) {
+func GetPrivateCodesWithLessThenIntervalDayByClientID(clientID int, day int) ([]models.PrivateCode, error) {
 	db := storage.GetDB()
 
 	query := `
@@ -63,9 +63,9 @@ func GetPrivateCodesWithLessThenOneWeekByClientID(clientID int) ([]models.Privat
 			p.client_id, p.time_stamp
 		FROM discount_code d
 		INNER JOIN private_code p ON d.code = p.code
-		WHERE p.client_id = $1 AND d.expiration_time BETWEEN NOW() AND NOW() + INTERVAL 7 DAY`
+		WHERE p.client_id = $12 AND d.expiration_time BETWEEN NOW() AND NOW() + INTERVAL $1 DAY`
 
-	rows, err := db.Query(query, clientID)
+	rows, err := db.Query(query, day, clientID)
 	if err != nil {
 		return nil, err
 	}
