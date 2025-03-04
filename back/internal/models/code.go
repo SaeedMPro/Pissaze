@@ -3,8 +3,8 @@ package models
 import "time"
 
 type DiscountCodeInterface interface{
-	IsPrivate()
-	GetDiscount()
+	IsPrivate() bool
+	GetDiscount() *DiscountCode
 }
 
 type DiscountCode struct {
