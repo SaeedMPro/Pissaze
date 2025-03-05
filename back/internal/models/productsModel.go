@@ -16,13 +16,12 @@ type Product struct {
 
 type ProductHDD struct {
 	Product
-	ProductInterface 
-	Capacity         float64 `json:"capacity" db:"capacity"`
-	RotationalSpeed  int     `json:"rotational_speed" db:"rotational_speed"`
-	Wattage          int     `json:"wattage" db:"wattage"`
-	Depth            float64 `json:"depth" db:"depth"`
-	Height           float64 `json:"height" db:"height"`
-	Width            float64 `json:"width" db:"width"`
+	Capacity        float64 `json:"capacity" db:"capacity"`
+	RotationalSpeed int     `json:"rotational_speed" db:"rotational_speed"`
+	Wattage         int     `json:"wattage" db:"wattage"`
+	Depth           float64 `json:"depth" db:"depth"`
+	Height          float64 `json:"height" db:"height"`
+	Width           float64 `json:"width" db:"width"`
 }
 
 type ProductCooler struct {
@@ -108,6 +107,11 @@ type ProductMotherboard struct {
 	Width            float64 `json:"width" db:"width"`
 }
 
+type Compatible struct {
+	FirstProduct ProductInterface
+	SecondProduct ProductInterface
+}
+
 func (p ProductCPU) GetType() string         { return "cpu" }
 func (p ProductCooler) GetType() string      { return "cooler" }
 func (p ProductHDD) GetType() string         { return "hdd" }
@@ -117,3 +121,4 @@ func (p ProductMotherboard) GetType() string { return "motherboard" }
 func (p ProductSSD) GetType() string         { return "ssd" }
 func (p ProductPowerSupply) GetType() string { return "power-suply" }
 func (p ProductRAMStick) GetType() string    { return "ram" }
+//TODO: p*

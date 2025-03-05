@@ -10,11 +10,11 @@ import (
 	"github.com/pissaze/internal/storage"
 )
 
-func init(){
-	fmt.Println("Start adding users and addresses")
-	//inputDatasetClients()
-	fmt.Println("All users and addresses added successfully!")
-}
+// func init(){
+// 	fmt.Println("Start adding users and addresses")
+// 	//inputDatasetClients()
+// 	fmt.Println("All users and addresses added successfully!")
+// }
 
 func GetClientByPhoneNumber( phoneNumber string) (*models.Client, error) {
 	
@@ -32,7 +32,6 @@ func GetClientByPhoneNumber( phoneNumber string) (*models.Client, error) {
 		&client.LastName, &client.WalletBalance, &client.Timestamp, 
 		&client.ReferralCode,
 	)
-
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -91,6 +90,24 @@ func GetVIPClientByID(ClientID int)(client *models.VIPClient,err error){
 	}
 }
 
+func GetNumberOfReferredByClient(clientID int) (int, error){
+	db := storage.GetDB()
+
+	query := `
+		SELECT COALESCE(COUNT(*), 0)
+		FROM refers r
+		JOIN client c ON r.referrer_id = c.referral_code
+		WHERE c.client_id = $1`
+
+	var numberOfReferred int
+	err := db.QueryRow(query, clientID).Scan(&numberOfReferred)
+
+	if err != nil {
+		return 0, fmt.Errorf("failed to get referral count: %w", err)
+	}
+	return numberOfReferred, nil
+}
+
 func InsertClient(client models.Client) (int, error) {
 	db := storage.GetDB()
 	var clientID int
@@ -115,7 +132,6 @@ func InsertAddress(addr models.AddressOfClient) error {
 	return err
 }
 
-
 func InsertVIPClient(vip models.VIPClient) error {
 	db := storage.GetDB()
 	query := `
@@ -125,50 +141,49 @@ func InsertVIPClient(vip models.VIPClient) error {
 	return err
 }
 
+// func inputDatasetClients() {
 
-func inputDatasetClients() {
+// 	users := []models.Client{
+// 		{PhoneNumber: "1001", FirstName: "Navid", LastName: "khan", ReferralCode: "NAVID123"},
+// 		{PhoneNumber: "1002", FirstName: "Danny", LastName: "farmer", ReferralCode: "DANNY456"},
+// 		{PhoneNumber: "1003", FirstName: "Saeed", LastName: "the greate", ReferralCode: "SAEED789"},
+// 		{PhoneNumber: "1004", FirstName: "Arsham", LastName: "jon", ReferralCode: "ARSHAM012"},
+// 		{PhoneNumber: "1005", FirstName: "Alireza", LastName: "morady", ReferralCode: "ALIREZA345"},
+// 	}
 
-	users := []models.Client{
-		{PhoneNumber: "1001", FirstName: "Navid", LastName: "khan", ReferralCode: "NAVID123"},
-		{PhoneNumber: "1002", FirstName: "Danny", LastName: "farmer", ReferralCode: "DANNY456"},
-		{PhoneNumber: "1003", FirstName: "Saeed", LastName: "the greate", ReferralCode: "SAEED789"},
-		{PhoneNumber: "1004", FirstName: "Arsham", LastName: "jon", ReferralCode: "ARSHAM012"},
-		{PhoneNumber: "1005", FirstName: "Alireza", LastName: "morady", ReferralCode: "ALIREZA345"},
-	}
+// 	for _, user := range users {
+// 		clientID, err := InsertClient(user)
+// 		if err != nil {
+// 			panic(err)
+// 		}
 
-	for _, user := range users {
-		clientID, err := InsertClient(user)
-		if err != nil {
-			panic(err)
-		}
-
-		user.ClientID = clientID
+// 		user.ClientID = clientID
 
 
-		addresses := []models.AddressOfClient{
-			{ClientID: clientID, Province: "Hameda", RemainAddress: "some where" + user.FirstName},
-			{ClientID: clientID, Province: "Tehran", RemainAddress: "else where" + user.FirstName},
-		}
+// 		addresses := []models.AddressOfClient{
+// 			{ClientID: clientID, Province: "Hameda", RemainAddress: "some where" + user.FirstName},
+// 			{ClientID: clientID, Province: "Tehran", RemainAddress: "else where" + user.FirstName},
+// 		}
 
-		for _, addr := range addresses {
-			err := InsertAddress(addr)
-			if err != nil {
-				panic(err)
-			}
-		}
+// 		for _, addr := range addresses {
+// 			err := InsertAddress(addr)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 		}
 
-		if user.FirstName == "Alireza" {
-			vip := models.VIPClient{
-				Client:       user,
-				ExpirationTime: time.Now().AddDate(0, 1, 0), 
-			}
-			err := InsertVIPClient(vip)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-}
+// 		if user.FirstName == "Alireza" {
+// 			vip := models.VIPClient{
+// 				Client:       user,
+// 				ExpirationTime: time.Now().AddDate(0, 1, 0), 
+// 			}
+// 			err := InsertVIPClient(vip)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 		}
+// 	}
+// }
 // ----- validators -----
 // func validate(client *client.ClientAbstract)(err error){
 // 	//TODO:
