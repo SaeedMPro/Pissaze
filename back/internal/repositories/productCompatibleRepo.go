@@ -7,6 +7,83 @@ import (
 	"github.com/pissaze/internal/storage"
 )
 
+func GetCompatibleByID(productID int) ([]models.Product, error) {
+	db := storage.GetDB()
+
+	query := `
+        SELECT p.id, p.brand, p.model, p.current_price, 
+               p.stock_count, p.category, p.product_image
+        FROM (
+            -- CPU-Cooler compatibility
+            SELECT cooler_id AS compatible_id FROM compatible_cc_socket WHERE cpu_id = $1
+            UNION
+            SELECT cpu_id FROM compatible_cc_socket WHERE cooler_id = $1
+            
+            UNION ALL
+            
+            -- CPU-Motherboard compatibility
+            SELECT motherboard_id FROM compatible_mc_socket WHERE cpu_id = $1
+            UNION
+            SELECT cpu_id FROM compatible_mc_socket WHERE motherboard_id = $1
+            
+            UNION ALL
+            
+            -- RAM-Motherboard compatibility
+            SELECT motherboard_id FROM compatible_rm_slot WHERE ram_id = $1
+            UNION
+            SELECT ram_id FROM compatible_rm_slot WHERE motherboard_id = $1
+            
+            UNION ALL
+            
+            -- GPU-PowerSupply compatibility
+            SELECT power_supply_id FROM compatible_gp_connector WHERE gpu_id = $1
+            UNION
+            SELECT gpu_id FROM compatible_gp_connector WHERE power_supply_id = $1
+            
+            UNION ALL
+            
+            -- SSD-Motherboard compatibility
+            SELECT motherboard_id FROM compatible_sm_slot WHERE ssd_id = $1
+            UNION
+            SELECT ssd_id FROM compatible_sm_slot WHERE motherboard_id = $1
+            
+            UNION ALL
+            
+            -- GPU-Motherboard compatibility
+            SELECT motherboard_id FROM compatible_gm_slot WHERE gpu_id = $1
+            UNION
+            SELECT gpu_id FROM compatible_gm_slot WHERE motherboard_id = $1
+        ) AS compat
+        JOIN product p ON p.id = compat.compatible_id`
+
+	rows, err := db.Query(query, productID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %v", err)
+	}
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var product models.Product
+		err := rows.Scan(
+			&product.ID, &product.Brand, &product.Model, &product.CurrentPrice,
+			&product.StockCount, &product.Category, &product.ProductImage,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+
+		products = append(products, product)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error during rows iteration: %v", err)
+	}
+
+	return products, nil
+} 
+
 func GetAllCompatibleCPUwithCoolerBySocket() ([]models.Compatible, error) {
 	db := storage.GetDB()
 
