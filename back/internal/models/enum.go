@@ -35,3 +35,16 @@ const (
 	CartStatusActive  CartStatusEnum = "active"
 )
 
+
+type CategoryProductEnum string
+const (
+    CategoryMotherboard  CategoryProductEnum = "Motherboard"
+    CategoryCPU          CategoryProductEnum = "CPU"
+    CategoryGPU         CategoryProductEnum = "GPU"
+    CategoryRAMStick    CategoryProductEnum = "RAM Stick"
+    CategoryCooler      CategoryProductEnum = "Cooler"
+    CategoryPowerSupply CategoryProductEnum = "Power Supply"
+    CategoryCase        CategoryProductEnum = "Case"
+    CategorySSD         CategoryProductEnum = "SSD"
+    CategoryHDD         CategoryProductEnum = "HDD"
+)
