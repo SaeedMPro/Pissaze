@@ -22,12 +22,13 @@ type Client struct {
 type VIPClient struct {
 	Client         Client    `json:"client" db:"client"`
 	ExpirationTime time.Time `json:"expiration_time" db:"expiration_time"`
+	MonthProfit   float64 `json:"month_profit"`
 }
 
 type AddressOfClient struct {
-	ClientID      int    `json:"client_id" db:"client_id"`
-	Province      string `json:"province" db:"province"`
-	RemainAddress string `json:"remain_address" db:"remain_address"`
+	ClientID      int     `json:"client_id" db:"client_id"`
+	Province      string  `json:"province" db:"province"`
+	RemainAddress string  `json:"remain_address" db:"remain_address"`
 }
 
 func (c Client) IsVIP() bool       { return false }

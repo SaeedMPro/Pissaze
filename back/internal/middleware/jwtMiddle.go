@@ -25,7 +25,7 @@ func Auth() gin.HandlerFunc {
 			token = token[7:] 
 		}
 
-		phoneNumber, err := service.ExtractPhoneNumber(token)
+		claims, err := service.ExtractClaims(token)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
@@ -35,7 +35,8 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("phone_number", phoneNumber) 
+		c.Set("phone_number", claims.PhoneNumber) 
+		c.Set("is_vip", claims.IsVIP) 
 		c.Next()
 	}
 }

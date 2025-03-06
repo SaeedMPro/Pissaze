@@ -29,9 +29,10 @@ type ProductList struct {
 
 type DiscountRespond struct {
 	NumberOfGiftCode int                  `json:"number_of_discount_code"`
-	DiscountCodes     []models.PrivateCode `json:"discount_code"`
+	DiscountCodes    []models.PrivateCode `json:"discount_code"`
 }
 
 type CompatibleRequest struct {
-	ProductsID []int `json:"product_id"`
+	ProductsID []int                        `json:"product_id"`
+	Filter     []models.CategoryProductEnum `json:"filter_list_category"`
 }
