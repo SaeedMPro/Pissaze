@@ -20,7 +20,7 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 -- Create ENUM types
 CREATE TYPE cooling_method_enum AS ENUM ('liquid', 'air');
 CREATE TYPE discount_enum AS ENUM ('public', 'private');
-CREATE TYPE transaction_status_enum AS ENUM ('Successful', 'semi-successful', 'unsuccessful');
+CREATE TYPE transaction_status_enum AS ENUM ('successful', 'semi-successful', 'unsuccessful');
 CREATE TYPE transaction_type_enum AS ENUM ('bank', 'wallet');
 CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
 
@@ -211,7 +211,7 @@ CREATE TABLE address_of_client (
 );
 
 CREATE TABLE shopping_cart (
-    cart_number    SERIAL NOT NULL, 
+    cart_number    INT NULL, 
     client_id      INT NOT NULL,
     cart_status    cart_status_enum NOT NULL,
     PRIMARY KEY (client_id, cart_number),
@@ -248,14 +248,14 @@ CREATE TABLE transaction (
 
 CREATE TABLE bank_transaction (
     tracking_code   INT PRIMARY KEY, 
-    card_number     INT NOT NULL,
+    card_number     VARCHAR(16) NOT NULL,
     FOREIGN KEY (tracking_code) REFERENCES transaction (tracking_code) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE locked_shopping_cart (
     cart_number     INT NOT NULL, 
     client_id       INT NOT NULL,
-    locked_number   SERIAL NOT NULL,
+    locked_number   INT NOT NULL,
     time_stamp      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (client_id, cart_number, locked_number),
     FOREIGN KEY (client_id, cart_number) REFERENCES shopping_cart (client_id, cart_number) ON UPDATE CASCADE ON DELETE CASCADE
