@@ -69,4 +69,37 @@ func getDiscounts(c *gin.Context) {
 
 func getCart(c *gin.Context) {
 
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   "Key dosn't set correctly",
+		})
+		return
+	}
+
+	client, err := service.GetClientByPhoneNumber(reqString)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	carts, err := service.GetClientCart(client.GetClient().ClientID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    carts,
+	})
 }
