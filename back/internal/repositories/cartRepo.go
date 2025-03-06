@@ -104,6 +104,7 @@ func GetProductsInLockedShoppingCart(ls *models.LockedShoppingCart) error {
 	defer rows.Close()
 
 	var products []models.ProductShoppingCart
+	totalPrice := 0.0
 	for rows.Next() {
 		var product models.ProductShoppingCart
 
@@ -116,6 +117,7 @@ func GetProductsInLockedShoppingCart(ls *models.LockedShoppingCart) error {
 			return fmt.Errorf("failed to scan product: %w", err)
 		}
 
+		totalPrice += float64(product.Quantity) * product.CartPrice 
 		products = append(products, product)
 	}
 
@@ -123,6 +125,7 @@ func GetProductsInLockedShoppingCart(ls *models.LockedShoppingCart) error {
 		return fmt.Errorf("row iteration error: %w", err)
 	}
 
+	ls.TotalPrice = totalPrice
 	ls.Products = products
 	return nil
 }
