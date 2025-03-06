@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
 	"github.com/pissaze/internal/middleware"
+	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/service"
 )
 
@@ -96,7 +97,9 @@ func getCart(c *gin.Context) {
 		})
 		return
 	}
-
+	if carts == nil {
+		carts = make([]models.ShoppingCart, 0)
+	}
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "User retrieved successfully",
