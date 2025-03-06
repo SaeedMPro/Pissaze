@@ -19,7 +19,7 @@ func GenerateTokenStr(client *models.ClientAbstract) (string, error) {
 	claims := models.Claims{
 		PhoneNumber: (*client).GetClient().PhoneNumber,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt : &jwt.Time{Time: exp}, //what the fuck ?
+			ExpiresAt : &jwt.Time{Time: exp}, 
 		},
 	}
 	

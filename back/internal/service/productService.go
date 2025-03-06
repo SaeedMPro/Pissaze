@@ -36,7 +36,7 @@ func GETAllGPU()([]models.ProductGPU,error){
 	return gpu, err
 }
 
-func GETAllPowerSuply()([]models.ProductPowerSupply,error){
+func GETAllPowerSupply()([]models.ProductPowerSupply,error){
 	power, err := repositories.GetAllProductPowerSupply()
 	return power, err
 }
@@ -54,11 +54,11 @@ func GETAllSSD()([]models.ProductSSD,error){
 func GETAllProducts()([]models.ProductInterface,error){
 	var list []models.ProductInterface
 
-	cpus, err := GetAllCPU()
+	cpu, err := GetAllCPU()
 	if err != nil {
 		return nil, err
 	}
-	for _, tmp := range cpus {
+	for _, tmp := range cpu {
 		list = append(list, tmp)
 	}
 
@@ -94,11 +94,11 @@ func GETAllProducts()([]models.ProductInterface,error){
 		list = append(list, tmp)
 	}
 
-	powerSuply, err := GETAllPowerSuply()
+	powerSupply, err := GETAllPowerSupply()
 	if err != nil {
 		return nil, err
 	}
-	for _, tmp := range powerSuply {
+	for _, tmp := range powerSupply {
 		list = append(list, tmp)
 	}
 

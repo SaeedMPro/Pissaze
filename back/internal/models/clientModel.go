@@ -15,7 +15,7 @@ type Client struct {
 	WalletBalance    float64           `json:"wallet_balance" db:"wallet_balance"`
 	Timestamp        time.Time         `json:"timestamp" db:"time_stamp"`
 	ReferralCode     string            `json:"referral_code" db:"referral_code"`
-	NumberofReferred int               `json:"number_of_refererred"`
+	NumberOfReferred int               `json:"number_of_referred"`
 	Addresses        []AddressOfClient `json:"addresses"`
 }
 

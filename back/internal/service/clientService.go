@@ -22,7 +22,7 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	if err != nil {
 		return nil, err
 	}
-	client.NumberofReferred, err = repositories.GetNumberOfReferredByClient(client.ClientID)
+	client.NumberOfReferred, err = repositories.GetNumberOfReferredByClient(client.ClientID)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +36,4 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	}
 
 	return client, nil
-}
-
-func FindUserDiscountCodeCount(client *models.ClientAbstract) (int, error) {
-	return 0, nil
-}
-
-func GetUserDiscountCode(client *models.ClientAbstract) ([]models.DiscountCodeInterface, error) {
-	return nil, nil
 }
