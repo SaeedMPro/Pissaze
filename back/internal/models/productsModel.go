@@ -112,13 +112,13 @@ type Compatible struct {
 	SecondProduct ProductInterface
 }
 
-func (p ProductCPU) GetType() string         { return "cpu" }
-func (p ProductCooler) GetType() string      { return "cooler" }
-func (p ProductHDD) GetType() string         { return "hdd" }
-func (p ProductCase) GetType() string        { return "case" }
-func (p ProductGPU) GetType() string         { return "gpu" }
-func (p ProductMotherboard) GetType() string { return "motherboard" }
-func (p ProductSSD) GetType() string         { return "ssd" }
-func (p ProductPowerSupply) GetType() string { return "power-suply" }
-func (p ProductRAMStick) GetType() string    { return "ram" }
+func (p ProductCPU) GetType() string         { return "CPU" }
+func (p ProductCooler) GetType() string      { return "Cooler" }
+func (p ProductHDD) GetType() string         { return "HDD" }
+func (p ProductCase) GetType() string        { return "Case" }
+func (p ProductGPU) GetType() string         { return "GPU" }
+func (p ProductMotherboard) GetType() string { return "Motherboard" }
+func (p ProductSSD) GetType() string         { return "SSD" }
+func (p ProductPowerSupply) GetType() string { return "Power Supply" }
+func (p ProductRAMStick) GetType() string    { return "RAM stick" }
 //TODO: p*

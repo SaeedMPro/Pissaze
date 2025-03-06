@@ -15,19 +15,20 @@ type Client struct {
 	WalletBalance    float64           `json:"wallet_balance" db:"wallet_balance"`
 	Timestamp        time.Time         `json:"timestamp" db:"time_stamp"`
 	ReferralCode     string            `json:"referral_code" db:"referral_code"`
-	NumberofReferred int               `json:"number_of_refererred"`
+	NumberOfReferred int               `json:"number_of_referred"`
 	Addresses        []AddressOfClient `json:"addresses"`
 }
 
 type VIPClient struct {
 	Client         Client    `json:"client" db:"client"`
 	ExpirationTime time.Time `json:"expiration_time" db:"expiration_time"`
+	MonthProfit   float64 `json:"month_profit"`
 }
 
 type AddressOfClient struct {
-	ClientID      int    `json:"client_id" db:"client_id"`
-	Province      string `json:"province" db:"province"`
-	RemainAddress string `json:"remain_address" db:"remain_address"`
+	ClientID      int     `json:"client_id" db:"client_id"`
+	Province      string  `json:"province" db:"province"`
+	RemainAddress string  `json:"remain_address" db:"remain_address"`
 }
 
 func (c Client) IsVIP() bool       { return false }

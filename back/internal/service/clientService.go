@@ -22,26 +22,26 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	if err != nil {
 		return nil, err
 	}
-	client.NumberofReferred, err = repositories.GetNumberOfReferredByClient(client.ClientID)
+
+	client.NumberOfReferred, err = repositories.GetNumberOfReferredByClient(client.ClientID)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	clientVIP, err := repositories.GetVIPClientByID(client.ClientID)
 	if err != nil {
 		return nil, err
-	} else if clientVIP != nil {
-		clientVIP.Client = *client
-		return clientVIP, nil
+		} else if clientVIP != nil {
+			clientVIP.Client = *client
+
+			profit, err := repositories.GetCurrentMonthVIPProfit(client.ClientID)
+			if err != nil {
+				return nil, err
+			}
+
+			clientVIP.MonthProfit = profit
+			return clientVIP, nil
 	}
 
 	return client, nil
-}
-
-func FindUserDiscountCodeCount(client *models.ClientAbstract) (int, error) {
-	return 0, nil
-}
-
-func GetUserDiscountCode(client *models.ClientAbstract) ([]models.DiscountCodeInterface, error) {
-	return nil, nil
 }

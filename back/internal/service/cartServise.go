@@ -7,11 +7,11 @@ import (
 )
 
 func GetClientCart(clientID int)([]models.ShoppingCart, error){
-	carst, err := repositories.GetShoppingCartByClientID(clientID)
-	return carst, err
+	cart, err := repositories.GetShoppingCartByClientID(clientID)
+	return cart, err
 }
 
-func GetClientSummuryOfCarts(clientID, count int)([]models.LockedShoppingCart, error) {
+func GetClientSummaryOfCarts(clientID, count int)([]models.LockedShoppingCart, error) {
 	carts, err := repositories.GetLockedShoppingCartByClientID(clientID, count)
 	if err != nil {
 		return nil, err

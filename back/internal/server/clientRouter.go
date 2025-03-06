@@ -12,33 +12,30 @@ import (
 	"github.com/pissaze/internal/util"
 )
 
-// /
-// /api/login
 // /api/client/
 // /api/client/discountCode
 // /api/client/cart
-
+// /api/client/cart/lockCart
 func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
 	group.Use(middleware.Auth())
+
 	group.GET("/", getInfo)
-	group.GET("/discountcode", getDiscounts)
+	group.GET("/discountCode", getDiscounts)
 	group.GET("/cart", getCart)
-	group.GET("/lockcart", getLockCart)
+	group.GET("/lockCart", getLockCart)
 }
 
 // getInfo godoc
-// @Summary Get client information by phone number
-// @Description Retrieve client details using their phone number. The phone number is provided in the request body. The response may include either a `Client` or a `VIPClient` object in the `data` field.
+// @Summary Get client information
+// @Description Retrieve client details using JWT token
 // @Tags client
-// @Accept json
+// @Security ApiKeyAuth
 // @Produce json
-// @Param request body dto.LoginRequest true "phone_number"
 // @Success 200 {object} dto.SuccessResponse{data=models.Client} "Client retrieved successfully"
-// @Success 200 {object} dto.SuccessResponse{data=models.VIPClient} "VIP client retrieved successfully"
-// @Failure 404 {object} dto.ErrorResponse "Client not found" 
+// @Failure 401 {object} dto.ErrorResponse "Unauthorized"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error"
-// @Router /api/client/ [GET]
+// @Router /api/client/ [get]
 func getInfo(c *gin.Context) {
 	
 	req, exist := c.Get("phone_number")
@@ -46,7 +43,7 @@ func getInfo(c *gin.Context) {
 	if !exist || !ok{
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
-			Error:   "Key dosn't set correctly",
+			Error:   "Key doesn't set correctly",
 		})
 		return
 	}
@@ -67,8 +64,20 @@ func getInfo(c *gin.Context) {
 	})
 }
 
+// getLockCart godoc
+// @Summary Get locked cart summary
+// @Description Retrieve summary of locked carts within specified days
+// @Tags client
+// @Security ApiKeyAuth
+// @Produce json
+// @Param days query int false "Number of days to look back (default 5)"
+// @Success 200 {object} dto.SuccessResponse{data=[]models.LockedShoppingCart} "Locked carts retrieved successfully"
+// @Failure 400 {object} dto.ErrorResponse "Invalid days parameter"
+// @Failure 401 {object} dto.ErrorResponse "Unauthorized"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/client/lockCart [get]
 func getCart(c *gin.Context) {
-	client, err := retriveUserByPhone(c)
+	client, err := retrieveUserByPhone(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -96,7 +105,7 @@ func getCart(c *gin.Context) {
 }
 
 func getLockCart(c *gin.Context) {
-	client, err := retriveUserByPhone(c)
+	client, err := retrieveUserByPhone(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -106,7 +115,7 @@ func getLockCart(c *gin.Context) {
 	}
 
 	//TODO: make days query param
-	carts ,err :=service.GetClientSummuryOfCarts(client.GetClient().ClientID,5)
+	carts ,err := service.GetClientSummaryOfCarts(client.GetClient().ClientID,5)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -123,8 +132,18 @@ func getLockCart(c *gin.Context) {
 	})
 }
 
+// getDiscounts godoc
+// @Summary Get client's discount codes
+// @Description Retrieve all active discount codes for the client
+// @Tags client
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse{data=dto.DiscountRespond} "Discount codes retrieved successfully"
+// @Failure 401 {object} dto.ErrorResponse "Unauthorized"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/client/discountCode [get]
 func getDiscounts(c *gin.Context) {
-	client, err := retriveUserByPhone(c)
+	client, err := retrieveUserByPhone(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -142,7 +161,7 @@ func getDiscounts(c *gin.Context) {
 		return
 	}
 
-	count, err := service.NumberOfGitedCose(client)
+	count, err := service.NumberOfGiftedCode(client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -151,9 +170,9 @@ func getDiscounts(c *gin.Context) {
 		return
 	}
 
-	res := dto.DiscountRespons{
+	res := dto.DiscountRespond{
 		NumberOfGiftCode: count,
-		DicountCodes: util.NilFixer(codes),
+		DiscountCodes: util.NilFixer(codes),
 	}
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
@@ -165,11 +184,11 @@ func getDiscounts(c *gin.Context) {
 
 
 //------------------------- helper ----------------------------
-func retriveUserByPhone(c *gin.Context)(models.ClientAbstract, error){
+func retrieveUserByPhone(c *gin.Context)(models.ClientAbstract, error){
 	req, exist := c.Get("phone_number")
 	reqString, ok := req.(string)
 	if !exist || !ok{
-		return nil, errors.New("Key dosn't set correctly")
+		return nil, errors.New("key doesn't set correctly")
 	}
 
 	client, err := service.GetClientByPhoneNumber(reqString)

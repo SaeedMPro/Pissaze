@@ -12,7 +12,7 @@ func GetClientPrivateCode(client models.ClientAbstract, day int)([]models.Privat
 	return codes,err
 }
 
-func NumberOfGitedCose(client models.ClientAbstract)(int,error){
+func NumberOfGiftedCode(client models.ClientAbstract)(int,error){
 	count, err := repositories.GetNumberOfGiftedDiscountCode(client.GetClient().ClientID)
 	return count, err
 }

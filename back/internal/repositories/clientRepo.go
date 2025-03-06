@@ -10,12 +10,6 @@ import (
 	"github.com/pissaze/internal/storage"
 )
 
-// func init(){
-// 	fmt.Println("Start adding users and addresses")
-// 	//inputDatasetClients()
-// 	fmt.Println("All users and addresses added successfully!")
-// }
-
 func GetClientByPhoneNumber( phoneNumber string) (*models.Client, error) {
 	
 	var client models.Client
@@ -73,7 +67,7 @@ func GetVIPClientByID(ClientID int)(client *models.VIPClient,err error){
 	vipQuery := `
 		SELECT expiration_time
 		FROM vip_client
-		WHERE client_id = $1`
+		WHERE client_id = $1 AND expiration_time >= NOW()`
 
 	db := storage.GetDB()
 	err = db.QueryRow(vipQuery, ClientID).Scan(&expirationTime)
@@ -108,6 +102,33 @@ func GetNumberOfReferredByClient(clientID int) (int, error){
 	return numberOfReferred, nil
 }
 
+func GetCurrentMonthVIPProfit(clientID int) (float64, error) {
+    db := storage.GetDB()
+
+    query := `
+        SELECT COALESCE(SUM(adt.cart_price) * 0.15, 0)
+        FROM vip_client vc
+        JOIN issued_for ifo ON vc.client_id = ifo.client_id
+        JOIN transaction t ON ifo.tracking_code = t.tracking_code
+        JOIN added_to adt ON ifo.client_id = adt.client_id 
+            AND ifo.cart_number = adt.cart_number 
+            AND ifo.locked_number = adt.locked_number
+        WHERE vc.client_id = $1
+          AND t.transaction_status = 'successful'
+          AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE)
+          AND t.time_stamp <= NOW()
+          AND vc.expiration_time >= t.time_stamp`
+
+    var cashback float64
+    err := db.QueryRow(query, clientID).Scan(&cashback)
+    
+    if err != nil {
+        return 0, fmt.Errorf("failed to calculate VIP profit: %w", err)
+    }
+    
+    return cashback, nil
+}
+
 func InsertClient(client models.Client) (int, error) {
 	db := storage.GetDB()
 	var clientID int
@@ -140,52 +161,3 @@ func InsertVIPClient(vip models.VIPClient) error {
 	_, err := db.Exec(query, vip.Client.ClientID, vip.ExpirationTime)
 	return err
 }
-
-// func inputDatasetClients() {
-
-// 	users := []models.Client{
-// 		{PhoneNumber: "1001", FirstName: "Navid", LastName: "khan", ReferralCode: "NAVID123"},
-// 		{PhoneNumber: "1002", FirstName: "Danny", LastName: "farmer", ReferralCode: "DANNY456"},
-// 		{PhoneNumber: "1003", FirstName: "Saeed", LastName: "the greate", ReferralCode: "SAEED789"},
-// 		{PhoneNumber: "1004", FirstName: "Arsham", LastName: "jon", ReferralCode: "ARSHAM012"},
-// 		{PhoneNumber: "1005", FirstName: "Alireza", LastName: "morady", ReferralCode: "ALIREZA345"},
-// 	}
-
-// 	for _, user := range users {
-// 		clientID, err := InsertClient(user)
-// 		if err != nil {
-// 			panic(err)
-// 		}
-
-// 		user.ClientID = clientID
-
-
-// 		addresses := []models.AddressOfClient{
-// 			{ClientID: clientID, Province: "Hameda", RemainAddress: "some where" + user.FirstName},
-// 			{ClientID: clientID, Province: "Tehran", RemainAddress: "else where" + user.FirstName},
-// 		}
-
-// 		for _, addr := range addresses {
-// 			err := InsertAddress(addr)
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 		}
-
-// 		if user.FirstName == "Alireza" {
-// 			vip := models.VIPClient{
-// 				Client:       user,
-// 				ExpirationTime: time.Now().AddDate(0, 1, 0), 
-// 			}
-// 			err := InsertVIPClient(vip)
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 		}
-// 	}
-// }
-// ----- validators -----
-// func validate(client *client.ClientAbstract)(err error){
-// 	//TODO:
-// 	return
-// }

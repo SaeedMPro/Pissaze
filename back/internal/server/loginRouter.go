@@ -8,12 +8,24 @@ import (
 	"github.com/pissaze/internal/service"
 )
 
+// /api/login
 func registerLoginRouter(r *gin.Engine) {
 	group := r.Group("/api/login")
 
 	group.POST("/", login)
 }
 
+// login godoc
+// @Summary User login
+// @Description Authenticate user and return JWT token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.LoginRequest true "Login credentials"
+// @Success 200 {object} dto.SuccessResponse{data=dto.LoginRespond} "Login successful"
+// @Failure 400 {object} dto.ErrorResponse "Invalid request format"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /api/login [post]
 func login(c *gin.Context) {
 	var req dto.LoginRequest
 
@@ -34,7 +46,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	token,err := service.GenerateTokenStr(&client)
+	token, err := service.GenerateTokenStr(&client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -43,10 +55,10 @@ func login(c *gin.Context) {
 		return
 	}
 
-
 	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Success: false,
-		Data: dto.LoginRespons{
+		Success: true,
+		Message: "Login successful",
+		Data: dto.LoginRespond{
 			IsVip: client.IsVIP(),
 			Token: token,
 		},

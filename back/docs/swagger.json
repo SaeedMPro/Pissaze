@@ -14,31 +14,22 @@
     "paths": {
         "/api/client/": {
             "get": {
-                "description": "Retrieve client details using their phone number. The phone number is provided in the request body. The response may include either a `Client` or a `VIPClient` object in the `data` field.",
-                "consumes": [
-                    "application/json"
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
                 ],
+                "description": "Retrieve client details using JWT token",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "client"
                 ],
-                "summary": "Get client information by phone number",
-                "parameters": [
-                    {
-                        "description": "phone_number",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.LoginRequest"
-                        }
-                    }
-                ],
+                "summary": "Get client information",
                 "responses": {
                     "200": {
-                        "description": "VIP client retrieved successfully",
+                        "description": "Client retrieved successfully",
                         "schema": {
                             "allOf": [
                                 {
@@ -48,15 +39,15 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.VIPClient"
+                                            "$ref": "#/definitions/models.Client"
                                         }
                                     }
                                 }
                             ]
                         }
                     },
-                    "404": {
-                        "description": "Client not found",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -69,9 +60,329 @@
                     }
                 }
             }
+        },
+        "/api/client/discountCode": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all active discount codes for the client",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Get client's discount codes",
+                "responses": {
+                    "200": {
+                        "description": "Discount codes retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DiscountRespond"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/client/lockCart": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve summary of locked carts within specified days",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "client"
+                ],
+                "summary": "Get locked cart summary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of days to look back (default 5)",
+                        "name": "days",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Locked carts retrieved successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.LockedShoppingCart"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid days parameter",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "description": "Authenticate user and return JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LoginRespond"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/product/compatible": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get products compatible with specified items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Find compatible products",
+                "parameters": [
+                    {
+                        "description": "Product IDs and filters",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CompatibleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Product"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/product/list": {
+            "get": {
+                "description": "Get filtered list of products",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List products",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ProductList"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.CompatibleRequest": {
+            "type": "object",
+            "properties": {
+                "filter_list_category": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CategoryProductEnum"
+                    }
+                },
+                "product_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.DiscountRespond": {
+            "type": "object",
+            "properties": {
+                "discount_code": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PrivateCode"
+                    }
+                },
+                "number_of_discount_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -93,6 +404,29 @@
             "properties": {
                 "phone_number": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.LoginRespond": {
+            "type": "object",
+            "properties": {
+                "is_vip": {
+                    "type": "boolean"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProductList": {
+            "type": "object",
+            "properties": {
+                "productList": {
+                    "type": "array",
+                    "items": {}
+                },
+                "size": {
+                    "type": "integer"
                 }
             }
         },
@@ -124,6 +458,44 @@
                 }
             }
         },
+        "models.CartStatusEnum": {
+            "type": "string",
+            "enum": [
+                "locked",
+                "blocked",
+                "active"
+            ],
+            "x-enum-varnames": [
+                "CartStatusLocked",
+                "CartStatusBlocked",
+                "CartStatusActive"
+            ]
+        },
+        "models.CategoryProductEnum": {
+            "type": "string",
+            "enum": [
+                "Motherboard",
+                "CPU",
+                "GPU",
+                "RAM Stick",
+                "Cooler",
+                "Power Supply",
+                "Case",
+                "SSD",
+                "HDD"
+            ],
+            "x-enum-varnames": [
+                "CategoryMotherboard",
+                "CategoryCPU",
+                "CategoryGPU",
+                "CategoryRAMStick",
+                "CategoryCooler",
+                "CategoryPowerSupply",
+                "CategoryCase",
+                "CategorySSD",
+                "CategoryHDD"
+            ]
+        },
         "models.Client": {
             "type": "object",
             "properties": {
@@ -142,6 +514,9 @@
                 "last_name": {
                     "type": "string"
                 },
+                "number_of_referred": {
+                    "type": "integer"
+                },
                 "phone_number": {
                     "type": "string"
                 },
@@ -156,16 +531,133 @@
                 }
             }
         },
-        "models.VIPClient": {
+        "models.DiscountEnum": {
+            "type": "string",
+            "enum": [
+                "public",
+                "private"
+            ],
+            "x-enum-varnames": [
+                "DiscountPublic",
+                "DiscountPrivate"
+            ]
+        },
+        "models.LockedShoppingCart": {
             "type": "object",
             "properties": {
-                "client": {
-                    "$ref": "#/definitions/models.Client"
+                "locked_cart_number": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProductShoppingCart"
+                    }
+                },
+                "shopping_cart": {
+                    "$ref": "#/definitions/models.ShoppingCart"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.PrivateCode": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "client_id": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "integer"
+                },
+                "code_type": {
+                    "$ref": "#/definitions/models.DiscountEnum"
+                },
+                "discount_limit": {
+                    "type": "number"
                 },
                 "expiration_time": {
                     "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "usage_limit": {
+                    "type": "integer"
                 }
             }
+        },
+        "models.Product": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "current_price": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "product_image": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "stock_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ProductShoppingCart": {
+            "type": "object",
+            "properties": {
+                "cart_price": {
+                    "type": "number"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ShoppingCart": {
+            "type": "object",
+            "properties": {
+                "cart_number": {
+                    "type": "integer"
+                },
+                "cart_status": {
+                    "$ref": "#/definitions/models.CartStatusEnum"
+                },
+                "client_id": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

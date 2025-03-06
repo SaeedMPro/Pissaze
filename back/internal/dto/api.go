@@ -17,7 +17,7 @@ type LoginRequest struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 }
 
-type LoginRespons struct {
+type LoginRespond struct {
 	Token string `json:"token"`
 	IsVip bool   `json:"is_vip"`
 }
@@ -27,11 +27,12 @@ type ProductList struct {
 	Size        int
 }
 
-type DiscountRespons struct {
+type DiscountRespond struct {
 	NumberOfGiftCode int                  `json:"number_of_discount_code"`
-	DicountCodes     []models.PrivateCode `json:"dicount_code"`
+	DiscountCodes    []models.PrivateCode `json:"discount_code"`
 }
 
 type CompatibleRequest struct {
-	ProuductsID []int `json:"product_id"`
+	ProductsID []int                        `json:"product_id"`
+	Filter     []models.CategoryProductEnum `json:"filter_list_category"`
 }

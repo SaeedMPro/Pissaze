@@ -1,35 +1,33 @@
 package service
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/repositories"
 )
 
-func FindcompatibleWithCarts(listID []int)([]models.Product, error){
+func FindCompatibleWithCarts(listID []int)([]models.Product, error){
 	if len(listID) <= 0 {return nil, nil}
 
-	final, err:= findcompatibleWithProduct(listID[0])
+	final, err := findCompatibleWithProduct(listID[0])
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("final is ->", final)
 
-	for _, prouductID := range listID {
-		compatible, err := findcompatibleWithProduct(prouductID)
+	for _, productID := range listID {
+		compatible, err := findCompatibleWithProduct(productID)
 		if err != nil {
 			return nil, err
 		}
 		final = intersectionSlices(final, compatible)
-		fmt.Println("final is ->", final)
 	}
 	return final, nil
 }
+
 //----------------------- helper ------------------------------------------
-func findcompatibleWithProduct(prouductId int)([]models.Product, error){
-	compatible, err := repositories.GetCompatibleByID(prouductId)
+func findCompatibleWithProduct(productId int)([]models.Product, error){
+	compatible, err := repositories.GetCompatibleByID(productId)
 	return compatible, err 
 }
 

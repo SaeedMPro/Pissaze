@@ -1,5 +1,25 @@
 basePath: /api
 definitions:
+  dto.CompatibleRequest:
+    properties:
+      filter_list_category:
+        items:
+          $ref: '#/definitions/models.CategoryProductEnum'
+        type: array
+      product_id:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.DiscountRespond:
+    properties:
+      discount_code:
+        items:
+          $ref: '#/definitions/models.PrivateCode'
+        type: array
+      number_of_discount_code:
+        type: integer
+    type: object
   dto.ErrorResponse:
     properties:
       error:
@@ -15,6 +35,21 @@ definitions:
         type: string
     required:
     - phone_number
+    type: object
+  dto.LoginRespond:
+    properties:
+      is_vip:
+        type: boolean
+      token:
+        type: string
+    type: object
+  dto.ProductList:
+    properties:
+      productList:
+        items: {}
+        type: array
+      size:
+        type: integer
     type: object
   dto.SuccessResponse:
     properties:
@@ -35,6 +70,38 @@ definitions:
       remain_address:
         type: string
     type: object
+  models.CartStatusEnum:
+    enum:
+    - locked
+    - blocked
+    - active
+    type: string
+    x-enum-varnames:
+    - CartStatusLocked
+    - CartStatusBlocked
+    - CartStatusActive
+  models.CategoryProductEnum:
+    enum:
+    - Motherboard
+    - CPU
+    - GPU
+    - RAM Stick
+    - Cooler
+    - Power Supply
+    - Case
+    - SSD
+    - HDD
+    type: string
+    x-enum-varnames:
+    - CategoryMotherboard
+    - CategoryCPU
+    - CategoryGPU
+    - CategoryRAMStick
+    - CategoryCooler
+    - CategoryPowerSupply
+    - CategoryCase
+    - CategorySSD
+    - CategoryHDD
   models.Client:
     properties:
       addresses:
@@ -47,6 +114,8 @@ definitions:
         type: string
       last_name:
         type: string
+      number_of_referred:
+        type: integer
       phone_number:
         type: string
       referral_code:
@@ -56,12 +125,84 @@ definitions:
       wallet_balance:
         type: number
     type: object
-  models.VIPClient:
+  models.DiscountEnum:
+    enum:
+    - public
+    - private
+    type: string
+    x-enum-varnames:
+    - DiscountPublic
+    - DiscountPrivate
+  models.LockedShoppingCart:
     properties:
-      client:
-        $ref: '#/definitions/models.Client'
+      locked_cart_number:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/models.ProductShoppingCart'
+        type: array
+      shopping_cart:
+        $ref: '#/definitions/models.ShoppingCart'
+      timestamp:
+        type: string
+      total_price:
+        type: number
+    type: object
+  models.PrivateCode:
+    properties:
+      amount:
+        type: number
+      client_id:
+        type: integer
+      code:
+        type: integer
+      code_type:
+        $ref: '#/definitions/models.DiscountEnum'
+      discount_limit:
+        type: number
       expiration_time:
         type: string
+      timestamp:
+        type: string
+      usage_limit:
+        type: integer
+    type: object
+  models.Product:
+    properties:
+      brand:
+        type: string
+      category:
+        type: string
+      current_price:
+        type: integer
+      id:
+        type: integer
+      model:
+        type: string
+      product_image:
+        items:
+          type: integer
+        type: array
+      stock_count:
+        type: integer
+    type: object
+  models.ProductShoppingCart:
+    properties:
+      cart_price:
+        type: number
+      product:
+        $ref: '#/definitions/models.Product'
+      quantity:
+        type: integer
+    type: object
+  models.ShoppingCart:
+    properties:
+      cart_number:
+        type: integer
+      cart_status:
+        $ref: '#/definitions/models.CartStatusEnum'
+      client_id:
+        type: integer
     type: object
 host: localhost:8082
 info:
@@ -74,13 +215,106 @@ info:
 paths:
   /api/client/:
     get:
+      description: Retrieve client details using JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Client retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Client'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get client information
+      tags:
+      - client
+  /api/client/discountCode:
+    get:
+      description: Retrieve all active discount codes for the client
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Discount codes retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DiscountRespond'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get client's discount codes
+      tags:
+      - client
+  /api/client/lockCart:
+    get:
+      description: Retrieve summary of locked carts within specified days
+      parameters:
+      - description: Number of days to look back (default 5)
+        in: query
+        name: days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Locked carts retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.LockedShoppingCart'
+                  type: array
+              type: object
+        "400":
+          description: Invalid days parameter
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get locked cart summary
+      tags:
+      - client
+  /api/login:
+    post:
       consumes:
       - application/json
-      description: Retrieve client details using their phone number. The phone number
-        is provided in the request body. The response may include either a `Client`
-        or a `VIPClient` object in the `data` field.
+      description: Authenticate user and return JWT token
       parameters:
-      - description: phone_number
+      - description: Login credentials
         in: body
         name: request
         required: true
@@ -90,23 +324,98 @@ paths:
       - application/json
       responses:
         "200":
-          description: VIP client retrieved successfully
+          description: Login successful
           schema:
             allOf:
             - $ref: '#/definitions/dto.SuccessResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/models.VIPClient'
+                  $ref: '#/definitions/dto.LoginRespond'
               type: object
-        "404":
-          description: Client not found
+        "400":
+          description: Invalid request format
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get client information by phone number
+      summary: User login
       tags:
-      - client
+      - auth
+  /api/product/compatible:
+    post:
+      consumes:
+      - application/json
+      description: Get products compatible with specified items
+      parameters:
+      - description: Product IDs and filters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CompatibleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Product'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Find compatible products
+      tags:
+      - products
+  /api/product/list:
+    get:
+      description: Get filtered list of products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ProductList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: List products
+      tags:
+      - products
+securityDefinitions:
+  ApiKeyAuth:
+    description: Type "Bearer" followed by a space and JWT token
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
