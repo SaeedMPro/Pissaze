@@ -3,27 +3,28 @@ package models
 import "time"
 
 type CartInterface interface {
-	GetStatus()
-	GetCart()
+	GetStatus() CartStatusEnum
+	GetCart() ShoppingCart
 }
 
 type ShoppingCart struct {
-	CartNumber int
-	ClientID   int
-	CartStatus CartStatusEnum
+	CartNumber int            `json:"cart_number" db:"cart_number"`
+	ClientID   int            `json:"client_id" db:"client_id"`
+	CartStatus CartStatusEnum `json:"cart_status" db:"cart_status"`
 }
 
 type LockedShoppingCart struct {
-	ShoppingCart
-	Products         []ProductShoppingCart
-	LockedCartNumber int
-	TimeStamp        time.Time
+	ShoppingCart    					   `json:"shopping_cart"`
+	Products         []ProductShoppingCart `json:"products"`
+	TotalPrice       float64               `json:"total_price" db:"total_price"`
+	LockedCartNumber int                   `json:"locked_cart_number" db:"locked_cart_number"`
+	TimeStamp        time.Time             `json:"timestamp" db:"time_stamp"`
 }
 
 type ProductShoppingCart struct {
-	Product   Product
-	Quantity  int
-	CartPrice float64
+	Product   Product `json:"product"`
+	Quantity  int     `json:"quantity" db:"quantity"`
+	CartPrice float64 `json:"cart_price" db:"cart_price"`
 }
 
 func (s ShoppingCart) GetCart() ShoppingCart     { return s }

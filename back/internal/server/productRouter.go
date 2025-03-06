@@ -25,7 +25,7 @@ func getList(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dto.ErrorResponse{
 			Success: false,
-			Error: fmt.Sprintf("Error in fecthing product's -> %s ", err.Error()),
+			Error: fmt.Sprintf("Error in fetching product's -> %s ", err.Error()),
 		})
 		return
 	}
@@ -47,7 +47,7 @@ func getCompatibleWithProductsList(c *gin.Context) {
 		})
 		return
 	}
-	competible, err := service.FindcompatibleWithCarts(req.ProuductsID)
+	compatible, err := service.FindCompatibleWithCarts(req.ProductsID)
 	if err != nil {
 		c.JSON(http.StatusOK, dto.ErrorResponse{
 			Success: false,
@@ -58,6 +58,6 @@ func getCompatibleWithProductsList(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "get compatible product with your cart",
-		Data:    competible,
+		Data:    compatible,
 	})
 }

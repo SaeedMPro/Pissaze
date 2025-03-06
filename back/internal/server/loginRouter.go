@@ -46,7 +46,7 @@ func login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: false,
-		Data: dto.LoginRespons{
+		Data: dto.LoginRespond{
 			IsVip: client.IsVIP(),
 			Token: token,
 		},
