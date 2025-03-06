@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,8 +25,9 @@ func getList(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dto.ErrorResponse{
 			Success: false,
-			Error: "Error in fecthing product's",
+			Error: fmt.Sprintf("Error in fecthing product's -> %s ", err.Error()),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
@@ -36,5 +38,26 @@ func getList(c *gin.Context) {
 }
 
 func getCompatibleWithProductsList(c *gin.Context) {
-	//TODO
+	var req dto.CompatibleRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Error:   "Invalid request format",
+		})
+		return
+	}
+	competible, err := service.FindcompatibleWithCarts(req.ProuductsID)
+	if err != nil {
+		c.JSON(http.StatusOK, dto.ErrorResponse{
+			Success: false,
+			Error: fmt.Sprintf("Error in compatible product's -> %s ", err.Error()),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "get compatible product with your cart",
+		Data:    competible,
+	})
 }
