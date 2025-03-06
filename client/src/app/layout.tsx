@@ -3,6 +3,9 @@ import type {Metadata} from "next"
 import "./globals.css";
 import localFont from 'next/font/local'
 import ReduxProvider from "@/redux/provider";
+import {Toaster} from "@/components/ui/sonner"
+import AuthToken from '@/components/AuthToken'
+
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -18,7 +21,10 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
         <html lang="fa" dir="rtl">
         <body className={myFont.className}>
         <ReduxProvider>
-            {children}
+            <AuthToken>
+                {children}
+                <Toaster/>
+            </AuthToken>
         </ReduxProvider>
         </body>
         </html>
