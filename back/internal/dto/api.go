@@ -28,7 +28,6 @@ type ProductList struct {
 }
 
 type DiscountRespons struct {
-	NumberOfGiftCode int                          `json:"number_of_discount_code"`
-	DicountCodes     models.DiscountCodeInterface `json:"dicount_code"`
+	NumberOfGiftCode int                  `json:"number_of_discount_code"`
+	DicountCodes     []models.PrivateCode `json:"dicount_code"`
 }
-

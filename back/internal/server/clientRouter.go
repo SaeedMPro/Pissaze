@@ -1,12 +1,15 @@
 package server
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
 	"github.com/pissaze/internal/middleware"
+	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/service"
+	"github.com/pissaze/internal/util"
 )
 
 // /
@@ -19,8 +22,9 @@ func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
 	group.Use(middleware.Auth())
 	group.GET("/", getInfo)
-	group.GET("/discountCode", getDiscounts)
+	group.GET("/discountcode", getDiscounts)
 	group.GET("/cart", getCart)
+	group.GET("/lockcart", getLockCart)
 }
 
 // getInfo godoc
@@ -37,17 +41,17 @@ func registerClientRoutes(r *gin.Engine) {
 // @Router /api/client/ [GET]
 func getInfo(c *gin.Context) {
 	
-	var req dto.LoginRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
-			Error:   "Invalid request format",
+			Error:   "Key dosn't set correctly",
 		})
 		return
 	}
 
-	client, err := service.GetClientByPhoneNumber(req.PhoneNumber)
+	client, err := service.GetClientByPhoneNumber(reqString)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -63,10 +67,115 @@ func getInfo(c *gin.Context) {
 	})
 }
 
-func getDiscounts(c *gin.Context) {
+func getCart(c *gin.Context) {
+	client, err := retriveUserByPhone(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
 	
+
+	carts, err := service.GetClientCart(client.GetClient().ClientID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+	
+	carts = util.NilFixer(carts)
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    carts,
+	})
 }
 
-func getCart(c *gin.Context) {
+func getLockCart(c *gin.Context) {
+	client, err := retriveUserByPhone(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
 
+	//TODO: make days query param
+	carts ,err :=service.GetClientSummuryOfCarts(client.GetClient().ClientID,5)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	carts = util.NilFixer(carts)
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    carts,
+	})
+}
+
+func getDiscounts(c *gin.Context) {
+	client, err := retriveUserByPhone(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	codes, err := service.GetClientPrivateCode(client,7)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	count, err := service.NumberOfGitedCose(client)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	res := dto.DiscountRespons{
+		NumberOfGiftCode: count,
+		DicountCodes: util.NilFixer(codes),
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    res,
+	})
+}
+
+
+//------------------------- helper ----------------------------
+func retriveUserByPhone(c *gin.Context)(models.ClientAbstract, error){
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		return nil, errors.New("Key dosn't set correctly")
+	}
+
+	client, err := service.GetClientByPhoneNumber(reqString)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }

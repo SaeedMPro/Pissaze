@@ -8,7 +8,7 @@ import (
 )
 
 func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
-	
+
 	if phoneNumber == "" {
 		return nil, errors.New("phone number is required")
 	}
@@ -22,11 +22,15 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	if err != nil {
 		return nil, err
 	}
+	client.NumberofReferred, err = repositories.GetNumberOfReferredByClient(client.ClientID)
+	if err != nil {
+		return nil, err
+	}
 
 	clientVIP, err := repositories.GetVIPClientByID(client.ClientID)
 	if err != nil {
 		return nil, err
-	}else if clientVIP != nil{
+	} else if clientVIP != nil {
 		clientVIP.Client = *client
 		return clientVIP, nil
 	}
@@ -34,10 +38,10 @@ func GetClientByPhoneNumber(phoneNumber string) (models.ClientAbstract, error) {
 	return client, nil
 }
 
-func FindUserDiscountCodeCount(client *models.ClientAbstract)(int,error){
-	return 0,nil
+func FindUserDiscountCodeCount(client *models.ClientAbstract) (int, error) {
+	return 0, nil
 }
 
-func GetUserDiscountCode(client *models.ClientAbstract)([]models.DiscountCodeInterface,error){
+func GetUserDiscountCode(client *models.ClientAbstract) ([]models.DiscountCodeInterface, error) {
 	return nil, nil
 }

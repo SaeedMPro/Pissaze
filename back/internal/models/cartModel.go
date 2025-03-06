@@ -23,7 +23,7 @@ type LockedShoppingCart struct {
 type ProductShoppingCart struct {
 	Product   Product
 	Quantity  int
-	CartPrice int
+	CartPrice float64
 }
 
 func (s ShoppingCart) GetCart() ShoppingCart     { return s }
