@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/pissaze/docs"
@@ -10,12 +11,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-const (
-	host = "localhost"
-	port = "8082"
-)
-
 func Start() {
+	var host = os.Getenv("HOST")
+	var port = os.Getenv("PORT")
+
 	r := gin.Default()
 	
 	r.Use(middleware.CORS())
