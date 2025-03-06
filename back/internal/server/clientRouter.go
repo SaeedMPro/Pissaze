@@ -37,17 +37,17 @@ func registerClientRoutes(r *gin.Engine) {
 // @Router /api/client/ [GET]
 func getInfo(c *gin.Context) {
 	
-	var req dto.LoginRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
-			Error:   "Invalid request format",
+			Error:   "Key dosn't set correctly",
 		})
 		return
 	}
 
-	client, err := service.GetClientByPhoneNumber(req.PhoneNumber)
+	client, err := service.GetClientByPhoneNumber(reqString)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
