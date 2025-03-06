@@ -11,7 +11,7 @@ func GetShoppingCartByClientID(clientID int) ([]models.ShoppingCart, error) {
 	db := storage.GetDB()
 
 	query := `
-		SELECT s.cart_number, s.client_id, s.cartStatus
+		SELECT s.cart_number, s.client_id, s.cart_status
 		FROM shopping_cart s
 		WHERE s.client_id = $1`
 
@@ -52,7 +52,7 @@ func GetLockedShoppingCartByClientID(clientID int, limit int) ([]models.LockedSh
 		JOIN issued_for i ON 
 			ls.locked_number = i.locked_number AND
 			ls.cart_number = i.cart_number AND
-			ls.client_id = i.cart_number
+			ls.client_id = i.client_id
 		WHERE ls.client_id = $1
 		ORDER BY ls.time_stamp
 		LIMIT $2`
@@ -87,7 +87,7 @@ func GetLockedShoppingCartByClientID(clientID int, limit int) ([]models.LockedSh
 
 func GetProductsInLockedShoppingCart(ls *models.LockedShoppingCart) error {
 	db := storage.GetDB()
-
+	
 	query := `
         SELECT 
             p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, a.quantity, a.cart_price

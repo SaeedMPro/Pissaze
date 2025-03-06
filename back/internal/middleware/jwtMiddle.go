@@ -4,48 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
 	"github.com/pissaze/internal/service"
 )
 
-
-
 func Auth() gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, http.ErrAbortHandler
-			}
-			return []byte(service.JwtSecretKey), nil
-		})
-		fmt.Println("here one")
-		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-				Success: false,
-				Error: fmt.Sprintf("err is %s , and valid %b", err.Error(), token.Valid),
-			})
-			c.Abort() 
-			return
-		}
-		fmt.Println("here two")
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Set("claims", claims)
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-		fmt.Println("here three")
-		c.Next() 
-	}
-}
-
-func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.Request.Header.Get("Authorization")
 		if token == "" {
