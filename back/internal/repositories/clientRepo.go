@@ -10,12 +10,6 @@ import (
 	"github.com/pissaze/internal/storage"
 )
 
-// func init(){
-// 	fmt.Println("Start adding users and addresses")
-// 	//inputDatasetClients()
-// 	fmt.Println("All users and addresses added successfully!")
-// }
-
 func GetClientByPhoneNumber( phoneNumber string) (*models.Client, error) {
 	
 	var client models.Client
@@ -73,7 +67,7 @@ func GetVIPClientByID(ClientID int)(client *models.VIPClient,err error){
 	vipQuery := `
 		SELECT expiration_time
 		FROM vip_client
-		WHERE client_id = $1`
+		WHERE client_id = $1 AND expiration_time >= NOW()`
 
 	db := storage.GetDB()
 	err = db.QueryRow(vipQuery, ClientID).Scan(&expirationTime)
@@ -106,6 +100,33 @@ func GetNumberOfReferredByClient(clientID int) (int, error){
 		return 0, fmt.Errorf("failed to get referral count: %w", err)
 	}
 	return numberOfReferred, nil
+}
+
+func GetCurrentMonthVIPProfit(clientID int) (float64, error) {
+    db := storage.GetDB()
+
+    query := `
+        SELECT COALESCE(SUM(adt.cart_price) * 0.15, 0)
+        FROM vip_client vc
+        JOIN issued_for ifo ON vc.client_id = ifo.client_id
+        JOIN transaction t ON ifo.tracking_code = t.tracking_code
+        JOIN added_to adt ON ifo.client_id = adt.client_id 
+            AND ifo.cart_number = adt.cart_number 
+            AND ifo.locked_number = adt.locked_number
+        WHERE vc.client_id = $1
+          AND t.transaction_status = 'successful'
+          AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE)
+          AND t.time_stamp <= NOW()
+          AND vc.expiration_time >= t.time_stamp`
+
+    var cashback float64
+    err := db.QueryRow(query, clientID).Scan(&cashback)
+    
+    if err != nil {
+        return 0, fmt.Errorf("failed to calculate VIP profit: %w", err)
+    }
+    
+    return cashback, nil
 }
 
 func InsertClient(client models.Client) (int, error) {

@@ -129,30 +129,3 @@ func GetProductsInLockedShoppingCart(ls *models.LockedShoppingCart) error {
 	ls.Products = products
 	return nil
 }
-
-func GetCurrentMonthVIPProfit(clientID int) (float64, error) {
-    db := storage.GetDB()
-
-    query := `
-        SELECT COALESCE(SUM(adt.cart_price) * 0.15, 0)
-        FROM vip_client vc
-        JOIN issued_for ifo ON vc.client_id = ifo.client_id
-        JOIN transaction t ON ifo.tracking_code = t.tracking_code
-        JOIN added_to adt ON ifo.client_id = adt.client_id 
-            AND ifo.cart_number = adt.cart_number 
-            AND ifo.locked_number = adt.locked_number
-        WHERE vc.client_id = $1
-          AND t.transaction_status = 'Successful'
-          AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE)
-          AND t.time_stamp <= NOW()
-          AND vc.expiration_time >= t.time_stamp`
-
-    var cashback float64
-    err := db.QueryRow(query, clientID).Scan(&cashback)
-    
-    if err != nil {
-        return 0, fmt.Errorf("failed to calculate VIP profit: %w", err)
-    }
-    
-    return cashback, nil
-}
