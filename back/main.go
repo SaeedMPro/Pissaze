@@ -12,6 +12,10 @@ import (
 // @contact.email mzahry36@gmail.com, dankeshavarz1075@gmail.com
 // @host localhost:8082
 // @BasePath /api
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token
 func main(){
 	server.Start()
 }

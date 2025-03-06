@@ -26,6 +26,15 @@ func registerProductRoutes(r *gin.Engine) {
 	}
 }
 
+// getList godoc
+// @Summary List products
+// @Description Get filtered list of products
+// @Tags products
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse{data=dto.ProductList}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/product/list [get]
 func getList(c *gin.Context) {
 	//TODO: filtering logic ???
 
@@ -45,6 +54,19 @@ func getList(c *gin.Context) {
 	})
 }
 
+// getCompatibleWithProductsList godoc
+// @Summary Find compatible products
+// @Description Get products compatible with specified items
+// @Tags products
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param request body dto.CompatibleRequest true "Product IDs and filters"
+// @Success 200 {object} dto.SuccessResponse{data=[]models.Product}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/product/compatible [post]
 func getCompatibleWithProductsList(c *gin.Context) {
 
 	isVIP, exists := c.Get("is_vip")
