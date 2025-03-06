@@ -10,7 +10,7 @@ import (
 
 var JwtSecretKey = []byte("your_secret_key")
 const(
-	expireTime   = 30 * time.Minute
+	expireTime   = 24 * time.Hour
 ) 
 
 
@@ -47,4 +47,6 @@ func ExtractPhoneNumber(tokenString string) (string, error) {
 
 	return "", errors.New("invalid token")
 }
+
+
 
