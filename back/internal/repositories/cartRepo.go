@@ -11,7 +11,7 @@ func GetShoppingCartByClientID(clientID int) ([]models.ShoppingCart, error) {
 	db := storage.GetDB()
 
 	query := `
-		SELECT s.cart_number, s.client_id, s.cartStatus
+		SELECT s.cart_number, s.client_id, s.cart_status
 		FROM shopping_cart s
 		WHERE s.client_id = $1`
 
