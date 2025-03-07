@@ -59,3 +59,4 @@ func (c CategoryProductEnum) IsValid() bool {
 	}
 	return false
 }
+

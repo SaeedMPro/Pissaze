@@ -11,7 +11,7 @@ import (
 // @contact.name Saeed, Danny
 // @contact.email mzahry36@gmail.com, dankeshavarz1075@gmail.com
 // @host localhost:8082
-// @BasePath /api
+// @BasePath 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
