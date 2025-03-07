@@ -15,7 +15,7 @@ func GetAllProductPowerSupply() ([]models.ProductPowerSupply, error) {
 		SELECT p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, p.product_image,
 		       ps.supported_wattage, ps.depth, ps.height, ps.width
 		FROM product p
-		JOIN product_power_supply ps ON p.id = rs.product_id`
+		JOIN product_power_supply ps ON p.id = ps.product_id`
 
 	rows, err := db.Query(query)
 	if err != nil {
