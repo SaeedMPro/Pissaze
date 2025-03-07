@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
 	"github.com/pissaze/internal/middleware"
-	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/service"
+	"github.com/pissaze/internal/util"
 )
 
 // /
@@ -22,6 +22,7 @@ func registerClientRoutes(r *gin.Engine) {
 	group.GET("/", getInfo)
 	group.GET("/discountCode", getDiscounts)
 	group.GET("/cart", getCart)
+	group.GET("/lockcart", getLockCart)
 }
 
 // getInfo godoc
@@ -97,9 +98,46 @@ func getCart(c *gin.Context) {
 		})
 		return
 	}
-	if carts == nil {
-		carts = make([]models.ShoppingCart, 0)
+	
+
+	carts = util.NilFixer(carts)
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    carts,
+	})
+}
+
+func getLockCart(c *gin.Context) {
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   "Key dosn't set correctly",
+		})
+		return
 	}
+
+	client, err := service.GetClientByPhoneNumber(reqString)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	carts ,err :=service.GetClientSummuryOfCarts(client.GetClient().ClientID,5)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	carts = util.NilFixer(carts)
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "User retrieved successfully",
