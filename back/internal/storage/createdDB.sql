@@ -23,7 +23,7 @@ CREATE TYPE discount_enum AS ENUM ('public', 'private');
 CREATE TYPE transaction_status_enum AS ENUM ('successful', 'semi-successful', 'unsuccessful');
 CREATE TYPE transaction_type_enum AS ENUM ('bank', 'wallet');
 CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
-CREATE TYPE cart_status_enum AS ENUM ('Motherboard', 'CPU', 'GPU', 'RAM Stick', 'Cooler', 'Power Supply', 'Case', 'SSD', 'HDD');
+CREATE TYPE product_category_enum AS ENUM ('Motherboard', 'CPU', 'GPU', 'RAM Stick', 'Cooler', 'Power Supply', 'Case', 'SSD', 'HDD');
 
 -- Table Definitions --
 
@@ -33,7 +33,7 @@ CREATE TABLE product (
     model           VARCHAR(50) NOT NULL,
     current_price   INT,
     stock_count     SMALLINT,
-    category        ,
+    category        product_category_enum,
     product_image   BYTEA
 );
 
