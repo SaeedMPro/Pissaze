@@ -1,11 +1,13 @@
 package server
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pissaze/internal/dto"
 	"github.com/pissaze/internal/middleware"
+	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/service"
 	"github.com/pissaze/internal/util"
 )
@@ -65,23 +67,8 @@ func getInfo(c *gin.Context) {
 	})
 }
 
-func getDiscounts(c *gin.Context) {
-	
-}
-
 func getCart(c *gin.Context) {
-
-	req, exist := c.Get("phone_number")
-	reqString, ok := req.(string)
-	if !exist || !ok{
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Success: false,
-			Error:   "Key dosn't set correctly",
-		})
-		return
-	}
-
-	client, err := service.GetClientByPhoneNumber(reqString)
+	client, err := retriveUserByPhone(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -89,6 +76,7 @@ func getCart(c *gin.Context) {
 		})
 		return
 	}
+	
 
 	carts, err := service.GetClientCart(client.GetClient().ClientID)
 	if err != nil {
@@ -109,17 +97,7 @@ func getCart(c *gin.Context) {
 }
 
 func getLockCart(c *gin.Context) {
-	req, exist := c.Get("phone_number")
-	reqString, ok := req.(string)
-	if !exist || !ok{
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Success: false,
-			Error:   "Key dosn't set correctly",
-		})
-		return
-	}
-
-	client, err := service.GetClientByPhoneNumber(reqString)
+	client, err := retriveUserByPhone(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -143,4 +121,25 @@ func getLockCart(c *gin.Context) {
 		Message: "User retrieved successfully",
 		Data:    carts,
 	})
+}
+
+func getDiscounts(c *gin.Context) {
+	
+}
+
+
+//------------------------- helper ----------------------------
+func retriveUserByPhone(c *gin.Context)(models.ClientAbstract, error){
+	req, exist := c.Get("phone_number")
+	reqString, ok := req.(string)
+	if !exist || !ok{
+		return nil, errors.New("Key dosn't set correctly")
+	}
+
+	client, err := service.GetClientByPhoneNumber(reqString)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
