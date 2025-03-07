@@ -14,7 +14,7 @@ import (
 func Start() {
 	var host = os.Getenv("HOST")
 	var port = os.Getenv("PORT")
-
+    fmt.Println(host, port)
 	r := gin.Default()
 	
 	r.Use(middleware.CORS())

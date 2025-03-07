@@ -43,7 +43,7 @@ export default function Login(){
                 <div className='flex items-center flex-col justify-center gap-10'>
                     <div className='flex items-center border h-10 border-white w-[300px] rounded-md px-2'>
                         <User className='text-white'/>
-                        <input type='number'
+                        <input type='text'
                                onChange={(e) => {
                                    setPhoneNumber(e.target.value)
                                }}

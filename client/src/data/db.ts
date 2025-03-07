@@ -18,16 +18,16 @@ export const SubTabsDB : TabsInterface[] = [
     {
         id : 1,
         name : 'اطلاعات کاربری',
-        value : 'user_information'
+        value : 'UserInformation'
     },
     {
         id : 2,
-        name : 'اطلاعات 2',
-        value : 'information2'
+        name : 'سبد خرید',
+        value : 'UserShopping'
     },
     {
         id : 3,
-        name : 'اطلاعات 3',
-        value : 'information3'
+        name : 'کد تخفیف',
+        value : 'UserDiscount'
     }
 ]
