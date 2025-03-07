@@ -45,7 +45,7 @@ func GetClientByPhoneNumber( phoneNumber string) (*models.Client, error) {
 
 func GetClientAddressByClientID(ClientID int)(address []models.AddressOfClient, err error){
 	addressQuery := `
-		SELECT province, remain_address
+		SELECT client_id, province, remain_address
 		FROM address_of_client
 		WHERE client_id = $1`
 
@@ -59,7 +59,7 @@ func GetClientAddressByClientID(ClientID int)(address []models.AddressOfClient, 
 	var addresses []models.AddressOfClient
 	for rows.Next() {
 		var address models.AddressOfClient
-		if err := rows.Scan(&address.Province, &address.RemainAddress); err != nil {
+		if err := rows.Scan(&address.ClientID,&address.Province, &address.RemainAddress); err != nil {
 			return nil, err
 		}
 		addresses = append(addresses, address)
