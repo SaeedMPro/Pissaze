@@ -22,7 +22,7 @@ func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
 	group.Use(middleware.Auth())
 	group.GET("/", getInfo)
-	group.GET("/discountCode", getDiscounts)
+	group.GET("/discountcode", getDiscounts)
 	group.GET("/cart", getCart)
 	group.GET("/lockcart", getLockCart)
 }
@@ -124,7 +124,43 @@ func getLockCart(c *gin.Context) {
 }
 
 func getDiscounts(c *gin.Context) {
+	client, err := retriveUserByPhone(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	codes, err := service.GetClientPrivateCode(client,7)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	count, err := service.NumberOfGitedCose(client)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	res := dto.DiscountRespons{
+		NumberOfGiftCode: count,
+		DicountCodes: util.NilFixer(codes),
+	}
 	
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Message: "User retrieved successfully",
+		Data:    res,
+	})
 }
 
 
