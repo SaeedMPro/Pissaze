@@ -22,33 +22,33 @@ func GetAllHDD()([]models.ProductHDD,error){
 }
 
 func GETAllMotherBoards()([]models.ProductMotherboard,error){
-	//TODO:
-	return nil, nil
+	motherBoard, err := repositories.GetAllProductMotherboard()
+	return motherBoard,err
 }
 
 func GETAllRam()([]models.ProductRAMStick,error){
-	//TODO:
-	return nil, nil
+	ram, err := repositories.GetAllProductRAMStick()
+	return ram, err
 }
 
 func GETAllGPU()([]models.ProductGPU,error){
-	//TODO:
-	return nil, nil
+	gpu, err := repositories.GetAllProductGPU()
+	return gpu, err
 }
 
 func GETAllPowerSuply()([]models.ProductPowerSupply,error){
-	//TODO:
-	return nil, nil
+	power, err := repositories.GetAllProductPowerSupply()
+	return power, err
 }
 
 func GETAllCase()([]models.ProductCase,error){
-	//TODO:
-	return nil, nil
+	pCase, err := repositories.GetAllProductCase()
+	return pCase, err
 }
 
 func GETAllSSD()([]models.ProductSSD,error){
-	//TODO:
-	return nil, nil
+	ssd, err := repositories.GetAllProductSSD()
+	return ssd, err
 }
 
 func GETAllProducts()([]models.ProductInterface,error){

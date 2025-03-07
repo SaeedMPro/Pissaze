@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,8 +25,9 @@ func getList(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, dto.ErrorResponse{
 			Success: false,
-			Error: "Error in fecthing product's",
+			Error: fmt.Sprintf("Error in fecthing product's -> %s ", err.Error()),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
