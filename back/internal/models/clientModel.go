@@ -8,14 +8,15 @@ type ClientAbstract interface {
 }
 
 type Client struct {
-	ClientID      int               `json:"client_id" db:"client_id"`
-	PhoneNumber   string            `json:"phone_number" db:"phone_number"`
-	FirstName     string            `json:"first_name" db:"first_name"`
-	LastName      string            `json:"last_name" db:"last_name"`
-	WalletBalance float64           `json:"wallet_balance" db:"wallet_balance"`
-	Timestamp     time.Time         `json:"timestamp" db:"time_stamp"`
-	ReferralCode  string            `json:"referral_code" db:"referral_code"`
-	Addresses     []AddressOfClient `json:"addresses"`
+	ClientID         int               `json:"client_id" db:"client_id"`
+	PhoneNumber      string            `json:"phone_number" db:"phone_number"`
+	FirstName        string            `json:"first_name" db:"first_name"`
+	LastName         string            `json:"last_name" db:"last_name"`
+	WalletBalance    float64           `json:"wallet_balance" db:"wallet_balance"`
+	Timestamp        time.Time         `json:"timestamp" db:"time_stamp"`
+	ReferralCode     string            `json:"referral_code" db:"referral_code"`
+	NumberofReferred int               `json:"number_of_refererred"`
+	Addresses        []AddressOfClient `json:"addresses"`
 }
 
 type VIPClient struct {
