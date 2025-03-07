@@ -513,7 +513,7 @@ BEGIN
     WHERE client_id = NEW.client_id;
 
     -- Restrict total carts for both regular and VIP users
-    IF cart_count_total >= 5 THEN 
+    IF cart_count_total > 5 THEN 
         RAISE EXCEPTION 'users cannot have more than five shopping carts.';
     END IF;
 
