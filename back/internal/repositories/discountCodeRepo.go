@@ -58,14 +58,15 @@ func GetPrivateCodesWithLessThenIntervalDayByClientID(clientID int, day int) ([]
 	db := storage.GetDB()
 
 	query := `
-		SELECT 
-			d.code, d.amount, d.discount_limit, d.usage_limit, d.expiration_time, d.code_type,
-			p.client_id, p.time_stamp
-		FROM discount_code d
-		INNER JOIN private_code p ON d.code = p.code
-		WHERE p.client_id = $12 AND d.expiration_time BETWEEN NOW() AND NOW() + INTERVAL $1 DAY`
+	SELECT 
+    d.code, d.amount, d.discount_limit, d.usage_limit, d.expiration_time, d.code_type,
+    p.client_id, p.time_stamp
+	FROM discount_code d
+	INNER JOIN private_code p ON d.code = p.code
+	WHERE p.client_id = $1 
+  	AND d.expiration_time BETWEEN NOW() AND (NOW() + INTERVAL '7 DAY')`
 
-	rows, err := db.Query(query, day, clientID)
+	rows, err := db.Query(query, clientID)
 	if err != nil {
 		return nil, err
 	}
