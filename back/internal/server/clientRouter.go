@@ -87,7 +87,6 @@ func getCart(c *gin.Context) {
 		return
 	}
 	
-
 	carts = util.NilFixer(carts)
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
@@ -106,6 +105,7 @@ func getLockCart(c *gin.Context) {
 		return
 	}
 
+	//TODO: make days query param
 	carts ,err :=service.GetClientSummuryOfCarts(client.GetClient().ClientID,5)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -155,7 +155,7 @@ func getDiscounts(c *gin.Context) {
 		NumberOfGiftCode: count,
 		DicountCodes: util.NilFixer(codes),
 	}
-	
+
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "User retrieved successfully",
