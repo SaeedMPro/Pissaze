@@ -1,7 +1,13 @@
 'use client'
 import {useEffect, useState} from "react";
+//component
 import axios from "axios";
-import Spinner from "@/components/Spinner";
+import {toast} from "sonner";
+import Loading from "@/components/Loading";
+//icon
+import { Clipboard } from 'lucide-react';
+
+
 
 export default function UserDiscount() {
     const [loading, setLoading] = useState<boolean>(true);
@@ -12,7 +18,7 @@ export default function UserDiscount() {
         const fetchUserDiscount = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:8082/api/client/discountCode', {headers: {Authorization: token}});
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/client/discountCode`, {headers: {Authorization: token}});
                 setUserDiscount(response.data.data);
                 console.log(response);
                 setLoading(false);
@@ -25,7 +31,7 @@ export default function UserDiscount() {
         fetchUserDiscount()
     }, []);
 
-    if (loading) <Spinner/>;
+    if (loading) return <Loading/>;
 
     return <div className="p-8">
         {/* Counter */}
@@ -42,10 +48,13 @@ export default function UserDiscount() {
             {userDiscount?.discount_code?.map((item:any,index:number) => (
                 <div key={index} className="relative bg-white p-8 my-2 rounded-lg shadow-md flex flex-col gap-2">
                     <button
-                        className="absolute left-4 top-4 text-gray-500"
-                        onClick={() => navigator.clipboard.writeText(item.code)}
+                        className="absolute left-4 top-4 text-gray-500 cursor-pointer hover:scale-105 active:scale-95 duration-300"
+                        onClick={() => {
+                            navigator.clipboard.writeText(item.code)
+                            toast.success("متن با موفقیت کپی شد.")
+                        }}
                     >
-                        📋
+                        <Clipboard/>
                     </button>
                     <p className="text-gray-700 text-sm">سریال کد</p>
                     <p className="font-bold">{item.code}</p>

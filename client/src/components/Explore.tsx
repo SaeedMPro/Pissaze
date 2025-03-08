@@ -11,7 +11,7 @@ import axios from "axios";
 import Image from "next/image";
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
-import {SkeletonBox} from "@/components/Skeleton";
+import {SkeletonBox} from "@/utils/Skeleton";
 
 
 export default function Explore() {
@@ -57,7 +57,6 @@ export default function Explore() {
                 setLoading(true);
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/product/list`, {headers: {Authorization: token}});
                 setProducts(response.data.data);
-                console.log(response);
                 setLoading(false);
             } catch (e) {
                 console.log(e)

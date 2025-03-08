@@ -14,9 +14,10 @@ import {
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 //icon
 import {X} from 'lucide-react';
+//components
 import axios from "axios";
 import Image from "next/image";
-import {SkeletonBox} from "@/components/Skeleton";
+import {SkeletonBox} from "@/utils/Skeleton";
 
 export default function CompatibilityDialog() {
     const dispatch = useDispatch<AppDispatch>();
