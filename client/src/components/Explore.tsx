@@ -18,8 +18,7 @@ export default function Explore() {
     const dispatch = useDispatch<AppDispatch>();
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const token = localStorage.getItem("token");
-    const isVip = localStorage.getItem("is_vip");
+    const [isVip, setIsVip] = useState<boolean | null>(null);
     const animatedComponents = makeAnimated();
     const {productsChoice} = useSelector((state: RootState) => state.compatible)
 
@@ -52,6 +51,10 @@ export default function Explore() {
     };
 
     useEffect(() => {
+        // Access localStorage inside useEffect to ensure client-side execution
+        const isVipStatus = localStorage.getItem("is_vip") === "true"; // Add this conversion
+        setIsVip(isVipStatus);
+        const token = localStorage.getItem("token");
         const fetchProduct = async () => {
             try {
                 setLoading(true);
@@ -128,7 +131,7 @@ export default function Explore() {
                         ))
                         : products.length > 0 && products.map((product: any, index) => (
                         <div key={product?.id}
-                             className='w-full bg-[#D9D9D9] rounded-md flex justify-between items-center relative px-10 py-4'>
+                             className='w-full bg-[#D9D9D9] shadow-xl outline-0 hover:outline-1 outline-[#244bc5] rounded-md flex justify-between items-center relative px-10 py-4'>
                             {isVip && (
                                 <input
                                     type="checkbox"
