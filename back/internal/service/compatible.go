@@ -25,6 +25,24 @@ func FindCompatibleWithCarts(listID []int)([]models.Product, error){
 	return final, nil
 }
 
+func FilterBy(base []models.Product, filter []models.CategoryProductEnum)(ans []models.Product){
+	if len(filter) <= 0 {
+		return base
+	}
+	
+	filterMap := make(map[string]bool)
+	for _, val := range filter {
+		filterMap[string(val)] = val.IsValid()
+	}
+
+	for _,product := range base {
+		if filterMap[product.Category] {
+			ans = append(ans, product)
+		}
+	}
+	return ans
+}
+
 //----------------------- helper ------------------------------------------
 func findCompatibleWithProduct(productId int)([]models.Product, error){
 	compatible, err := repositories.GetCompatibleByID(productId)
