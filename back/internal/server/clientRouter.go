@@ -12,10 +12,7 @@ import (
 	"github.com/pissaze/internal/util"
 )
 
-// /api/client/
-// /api/client/discountCode
-// /api/client/cart
-// /api/client/cart/lockCart
+
 func registerClientRoutes(r *gin.Engine) {
 	group := r.Group("/api/client")
 	group.Use(middleware.Auth())
