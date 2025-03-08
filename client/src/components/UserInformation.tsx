@@ -156,8 +156,8 @@ export default function UserInformation() {
                             خانوادگی
                             :
                         </p>
-                        <Image src='/images/vip.svg' alt='vip' width={30} height={30}
-                               className='absolute -top-[15px] -left-3 '/>
+                        <Image src='/images/vip.svg' alt='vip' width={40} height={40}
+                               className='absolute -top-[16px] -left-4 animate-pulse  '/>
                         {loading ? <SkeletonBox className='w-full h-8'/> :
                             <p className='text-lg font-bold'>{userInfo?.client?.first_name} {userInfo?.client?.last_name}</p>}
                     </div>

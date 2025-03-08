@@ -46,7 +46,7 @@ export default function UserDiscount() {
         <div className="mt-6 bg-gray-100 p-4 rounded-xl">
             <p className="font-bold text-center mb-2">کد تخفیف‌های شخصی با کمتر از یک هفته مهلت</p>
             {userDiscount?.discount_code?.map((item:any,index:number) => (
-                <div key={index} className="relative bg-white p-8 my-2 rounded-lg shadow-md flex flex-col gap-2">
+                <div key={index} className="relative bg-white p-8 my-5 rounded-lg shadow-xl outline-0 hover:outline-1 outline-[#244bc5] flex flex-col gap-2">
                     <button
                         className="absolute left-4 top-4 text-gray-500 cursor-pointer hover:scale-105 active:scale-95 duration-300"
                         onClick={() => {
