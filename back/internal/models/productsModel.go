@@ -121,4 +121,5 @@ func (p ProductMotherboard) GetType() string { return "Motherboard" }
 func (p ProductSSD) GetType() string         { return "SSD" }
 func (p ProductPowerSupply) GetType() string { return "Power Supply" }
 func (p ProductRAMStick) GetType() string    { return "RAM stick" }
+func (p Product)GetType() string {return "product"}
 //TODO: p*

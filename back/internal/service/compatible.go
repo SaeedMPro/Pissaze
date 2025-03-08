@@ -43,6 +43,7 @@ func FilterBy(base []models.Product, filter []models.CategoryProductEnum)(ans []
 	return ans
 }
 
+
 //----------------------- helper ------------------------------------------
 func findCompatibleWithProduct(productId int)([]models.Product, error){
 	compatible, err := repositories.GetCompatibleByID(productId)
