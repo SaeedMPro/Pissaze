@@ -43,9 +43,9 @@ func GetProductRAmStickByID(id int) (*models.ProductRAMStick, error) {
 
 	query := `
 		SELECT p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, p.product_image,
-		       c.cooling_method, c.fan_size, c.max_rotational_speed, c.wattage, c.depth, c.height, c.width
+		       rs.generation, rs.capacity, rs.frequency, rs.wattage, rs.depth, rs.height, rs.width
 		FROM product p
-		JOIN product_ram_stick c ON p.id = c.product_id
+		JOIN product_ram_stick rs ON p.id = rs.product_id
 		WHERE p.id = $1`
 
 	var product models.ProductRAMStick
