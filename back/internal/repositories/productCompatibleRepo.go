@@ -1,13 +1,73 @@
 package repositories
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/pissaze/internal/models"
 	"github.com/pissaze/internal/storage"
 )
 
-func GetCompatibleByID(productID int) ([]models.Product, error) {
+func GetProductByID(id int) (product models.Product,err error) {
+	db := storage.GetDB()
+    
+    query := `
+        SELECT id, brand, model, current_price, stock_count, category, product_image
+        FROM product
+        WHERE id = $1
+    `
+
+    row := db.QueryRow(query, id)
+    err = row.Scan(
+        &product.ID,
+        &product.Brand,
+        &product.Model,
+        &product.CurrentPrice,
+        &product.StockCount,
+        &product.Category,
+        &product.ProductImage,
+    )
+
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return models.Product{}, fmt.Errorf("product with ID %d not found", id)
+        }
+        return models.Product{}, fmt.Errorf("failed to get product: %v", err)
+    }
+
+    return product, nil
+}
+
+func GetCompatibleByID(productID int) (products []models.Product,err error){
+	product, err := GetProductByID(productID)
+	if err != nil {
+		return nil, err
+	}
+
+	switch product.Category {
+	case "CPU":
+		products, err = CompatibleWithCpu(productID)
+	case "Motherboard":
+		products, err = CompatibleWithMotherboard(productID)
+	case "RAM Stick":
+		products, err = CompatibleWithRAM(productID)
+	case "Cooler":
+		products, err = CompatibleWithCooler(productID)
+	case "GPU":
+		products, err = CompatibleWithGPU(productID)
+	case "SSD" :
+		products, err = CompatibleWithSSD(productID)
+	case "HDD":
+		products, err = CompatibleWithHDD(productID)
+	default:
+		//log.Panicln("wrong input")
+		log.Println("wrong input")
+	}
+	return products, err
+}
+
+func GetCompatibleByID_(productID int) ([]models.Product, error) {
 	db := storage.GetDB()
 
 	query := `
@@ -389,3 +449,6 @@ func GetAllCompatibleGPUwithMotherboardBySlot() ([]models.Compatible, error) {
 
 	return compatibles, nil
 }
+
+
+
