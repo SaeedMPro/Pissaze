@@ -23,172 +23,171 @@ CREATE TYPE discount_enum AS ENUM ('public', 'private');
 CREATE TYPE transaction_status_enum AS ENUM ('successful', 'semi-successful', 'unsuccessful');
 CREATE TYPE transaction_type_enum AS ENUM ('bank', 'wallet');
 CREATE TYPE cart_status_enum AS ENUM ('locked', 'blocked', 'active');
-CREATE TYPE cart_status_enum AS ENUM ('Motherboard', 'CPU', 'GPU', 'RAM Stick', 'Cooler', 'Power Supply', 'Case', 'SSD', 'HDD');
-
+CREATE TYPE product_category_enum AS ENUM ('Motherboard', 'CPU', 'GPU', 'RAM Stick', 'Cooler', 'Power Supply', 'Case', 'SSD', 'HDD');
 -- Table Definitions --
 
 CREATE TABLE product (
-    id              SERIAL PRIMARY KEY, 
+    id              SERIAL PRIMARY KEY,
     brand           VARCHAR(50) NOT NULL,
     model           VARCHAR(50) NOT NULL,
     current_price   INT,
     stock_count     SMALLINT,
-    category        ,
+    category        product_category_enum,
     product_image   BYTEA
 );
 
 CREATE TABLE product_hdd (
-    product_id          INT PRIMARY KEY, 
-    capacity            DECIMAL(10, 2),          
-    rotational_speed    INT,  
-    wattage             INT,           
-    depth               DECIMAL(10, 2), 
-    height              DECIMAL(10, 2),    
+    product_id          INT PRIMARY KEY,
+    capacity            DECIMAL(10, 2),
+    rotational_speed    INT,
+    wattage             INT,
+    depth               DECIMAL(10, 2),
+    height              DECIMAL(10, 2),
     width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_cooler (
-    product_id              INT PRIMARY KEY, 
+    product_id              INT PRIMARY KEY,
     cooling_method          cooling_method_enum,
-    fan_size                INT,              
-    max_rotational_speed    INT,  
-    wattage                 INT,               
-    depth                   DECIMAL(10, 2), 
-    height                  DECIMAL(10, 2),    
-    width                   DECIMAL(10, 2),    
+    fan_size                INT,
+    max_rotational_speed    INT,
+    wattage                 INT,
+    depth                   DECIMAL(10, 2),
+    height                  DECIMAL(10, 2),
+    width                   DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_cpu (
-    product_id          INT PRIMARY KEY, 
+    product_id          INT PRIMARY KEY,
     generation          VARCHAR(50),
     microarchitecture   VARCHAR(50),
     num_cores           SMALLINT,
     num_threads         SMALLINT,
-    base_frequency      DECIMAL(10, 2), 
+    base_frequency      DECIMAL(10, 2),
     boost_frequency     DECIMAL(10, 2),
-    max_memory_limit    INT,         
-    wattage             INT,                
+    max_memory_limit    INT,
+    wattage             INT,
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_ram_stick (
-    product_id  INT PRIMARY KEY, 
+    product_id  INT PRIMARY KEY,
     generation  VARCHAR(50),
-    capacity    DECIMAL(10, 2),    
-    frequency   DECIMAL(10, 2),   
-    wattage     INT, 
-    depth       DECIMAL(10, 2), 
-    height      DECIMAL(10, 2),    
-    width       DECIMAL(10, 2),   
+    capacity    DECIMAL(10, 2),
+    frequency   DECIMAL(10, 2),
+    wattage     INT,
+    depth       DECIMAL(10, 2),
+    height      DECIMAL(10, 2),
+    width       DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_case (
-    product_id      INT PRIMARY KEY, 
+    product_id      INT PRIMARY KEY,
     product_type    VARCHAR(50),
     color           VARCHAR(50),
     material        VARCHAR(50),
-    fan_size        INT,         
+    fan_size        INT,
     num_fans        SMALLINT,
     wattage         INT,
-    depth           DECIMAL(10, 2), 
-    height          DECIMAL(10, 2),    
+    depth           DECIMAL(10, 2),
+    height          DECIMAL(10, 2),
     width           DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_power_supply (
-    product_id          INT PRIMARY KEY, 
+    product_id          INT PRIMARY KEY,
     supported_wattage   INT,
-    depth               DECIMAL(10, 2), 
-    height              DECIMAL(10, 2),    
+    depth               DECIMAL(10, 2),
+    height              DECIMAL(10, 2),
     width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_gpu (
-    product_id  INT PRIMARY KEY, 
-    ram_size    INT,         
-    clock_speed DECIMAL(10, 2), 
+    product_id  INT PRIMARY KEY,
+    ram_size    INT,
+    clock_speed DECIMAL(10, 2),
     num_fans    SMALLINT,
     wattage     INT,
-    depth       DECIMAL(10, 2), 
-    height      DECIMAL(10, 2),    
+    depth       DECIMAL(10, 2),
+    height      DECIMAL(10, 2),
     width       DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_ssd (
-    product_id  INT PRIMARY KEY, 
-    capacity    DECIMAL(10, 2), 
+    product_id  INT PRIMARY KEY,
+    capacity    DECIMAL(10, 2),
     wattage     INT,
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE product_motherboard (
-    product_id          INT PRIMARY KEY, 
+    product_id          INT PRIMARY KEY,
     chipset_name        VARCHAR(50),
     num_memory_slots    SMALLINT,
     memory_speed_range  DECIMAL(10, 2),
     wattage             INT,
-    depth               DECIMAL(10, 2), 
-    height              DECIMAL(10, 2),    
+    depth               DECIMAL(10, 2),
+    height              DECIMAL(10, 2),
     width               DECIMAL(10, 2),
     FOREIGN KEY (product_id) REFERENCES product (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_cc_socket (
-    cpu_id      INT NOT NULL, 
+    cpu_id      INT NOT NULL,
     cooler_id   INT NOT NULL,
-    PRIMARY KEY (cpu_id, cooler_id), 
+    PRIMARY KEY (cpu_id, cooler_id),
     FOREIGN KEY (cooler_id) REFERENCES product_cooler (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (cpu_id) REFERENCES product_cpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_mc_socket (
-    cpu_id          INT NOT NULL, 
-    motherboard_id  INT NOT NULL, 
-    PRIMARY KEY (cpu_id, motherboard_id), 
+    cpu_id          INT NOT NULL,
+    motherboard_id  INT NOT NULL,
+    PRIMARY KEY (cpu_id, motherboard_id),
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (cpu_id) REFERENCES product_cpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_rm_slot (
-    ram_id          INT NOT NULL, 
-    motherboard_id  INT NOT NULL, 
+    ram_id          INT NOT NULL,
+    motherboard_id  INT NOT NULL,
     PRIMARY KEY (ram_id, motherboard_id),
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (ram_id) REFERENCES product_ram_stick (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_gp_connector (
-    gpu_id          INT NOT NULL, 
-    power_supply_id INT NOT NULL, 
+    gpu_id          INT NOT NULL,
+    power_supply_id INT NOT NULL,
     PRIMARY KEY (gpu_id, power_supply_id),
     FOREIGN KEY (gpu_id) REFERENCES product_gpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (power_supply_id) REFERENCES product_power_supply (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_sm_slot (
-    ssd_id          INT NOT NULL, 
+    ssd_id          INT NOT NULL,
     motherboard_id  INT NOT NULL,
-    PRIMARY KEY (ssd_id, motherboard_id), 
+    PRIMARY KEY (ssd_id, motherboard_id),
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (ssd_id) REFERENCES product_ssd (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE compatible_gm_slot (
-    gpu_id          INT NOT NULL, 
+    gpu_id          INT NOT NULL,
     motherboard_id  INT NOT NULL,
-    PRIMARY KEY (gpu_id, motherboard_id), 
+    PRIMARY KEY (gpu_id, motherboard_id),
     FOREIGN KEY (motherboard_id) REFERENCES product_motherboard (product_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (gpu_id) REFERENCES product_gpu (product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE client (
-    client_id          SERIAL PRIMARY KEY, 
+    client_id          SERIAL PRIMARY KEY,
     phone_number       VARCHAR(15) NOT NULL UNIQUE,
     first_name         VARCHAR(50) NOT NULL,
     last_name          VARCHAR(50) NOT NULL,
@@ -198,13 +197,13 @@ CREATE TABLE client (
 );
 
 CREATE TABLE vip_client (
-    client_id       INT PRIMARY KEY, 
+    client_id       INT PRIMARY KEY,
     expiration_time TIMESTAMP NOT NULL,
     FOREIGN KEY (client_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE address_of_client (
-    client_id       INT NOT NULL, 
+    client_id       INT NOT NULL,
     province        VARCHAR(20) NOT NULL,
     remain_address  VARCHAR(255) NOT NULL,
     PRIMARY KEY (client_id, province, remain_address),
@@ -212,7 +211,7 @@ CREATE TABLE address_of_client (
 );
 
 CREATE TABLE shopping_cart (
-    cart_number    INT NULL, 
+    cart_number    INT NULL,
     client_id      INT NOT NULL,
     cart_status    cart_status_enum NOT NULL,
     PRIMARY KEY (client_id, cart_number),
@@ -220,10 +219,10 @@ CREATE TABLE shopping_cart (
 );
 
 CREATE TABLE discount_code (
-    code            SERIAL PRIMARY KEY, 
+    code            SERIAL PRIMARY KEY,
     amount          DECIMAL(12, 2) CHECK (amount > 0),
     discount_limit  DECIMAL(12, 2) CHECK (discount_limit > 0),
-    usage_limit     SMALLINT DEFAULT 1 CHECK (usage_limit >= 0) , 
+    usage_limit     SMALLINT DEFAULT 1 CHECK (usage_limit >= 0) ,
     expiration_time TIMESTAMP,
     code_type       discount_enum NOT NULL
 );
@@ -231,7 +230,7 @@ CREATE TABLE discount_code (
 --I decide to delete public_code and instead add `type` in discount_code
 
 CREATE TABLE private_code (
-    code        INT PRIMARY KEY, 
+    code        INT PRIMARY KEY,
     client_id   INT NOT NULL,
     time_stamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -239,7 +238,7 @@ CREATE TABLE private_code (
 );
 
 CREATE TABLE transaction (
-    tracking_code       INT PRIMARY KEY, 
+    tracking_code       INT PRIMARY KEY,
     transaction_status  transaction_status_enum NOT NULL,
     transaction_type    transaction_type_enum NOT NULL,
     time_stamp          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -248,13 +247,13 @@ CREATE TABLE transaction (
 --I decide to delete wallet_transaction and instead add `type` in transaction
 
 CREATE TABLE bank_transaction (
-    tracking_code   INT PRIMARY KEY, 
+    tracking_code   INT PRIMARY KEY,
     card_number     VARCHAR(16) NOT NULL,
     FOREIGN KEY (tracking_code) REFERENCES transaction (tracking_code) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE locked_shopping_cart (
-    cart_number     INT NOT NULL, 
+    cart_number     INT NOT NULL,
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
     time_stamp      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -263,7 +262,7 @@ CREATE TABLE locked_shopping_cart (
 );
 
 CREATE TABLE deposit_wallet (
-    tracking_code   INT PRIMARY KEY, 
+    tracking_code   INT PRIMARY KEY,
     client_id       INT NOT NULL,
     amount          DECIMAL(12, 2) NOT NULL,
     FOREIGN KEY (client_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -271,24 +270,24 @@ CREATE TABLE deposit_wallet (
 );
 
 CREATE TABLE subscribes (
-    tracking_code   INT PRIMARY KEY, 
+    tracking_code   INT PRIMARY KEY,
     client_id       INT NOT NULL,
     FOREIGN KEY (client_id) REFERENCES client (client_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (tracking_code) REFERENCES transaction (tracking_code) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE refers (
-    referee_id  VARCHAR(20) PRIMARY KEY, 
+    referee_id  VARCHAR(20) PRIMARY KEY,
     referrer_id VARCHAR(20) NOT NULL,
     FOREIGN KEY (referee_id) REFERENCES client (referral_code) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (referrer_id) REFERENCES client (referral_code) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE added_to (
-    cart_number     INT NOT NULL, 
+    cart_number     INT NOT NULL,
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
-    product_id      INT NOT NULL, 
+    product_id      INT NOT NULL,
     quantity        INT DEFAULT 1  CHECK (quantity > 0),
     cart_price      DECIMAL(12, 2) CHECK (cart_price >= 0),
     PRIMARY KEY (client_id, cart_number, locked_number, product_id),
@@ -297,10 +296,10 @@ CREATE TABLE added_to (
 );
 
 CREATE TABLE applied_to (
-    cart_number     INT NOT NULL, 
+    cart_number     INT NOT NULL,
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
-    discount_code   INT NOT NULL, 
+    discount_code   INT NOT NULL,
     time_stamp      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (client_id, cart_number, locked_number, discount_code),
     FOREIGN KEY (discount_code) REFERENCES discount_code (code) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -309,7 +308,7 @@ CREATE TABLE applied_to (
 
 CREATE TABLE issued_for (
     tracking_code   INT PRIMARY KEY,
-    cart_number     INT NOT NULL, 
+    cart_number     INT NOT NULL,
     client_id       INT NOT NULL,
     locked_number   INT NOT NULL,
     FOREIGN KEY (client_id, cart_number, locked_number) REFERENCES locked_shopping_cart (client_id, cart_number, locked_number) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -323,7 +322,7 @@ Ensures that:
     If a user refers another user, a discount code appropriate to their position in the referral chain
     should be gifted to all users in that chain.
 */
-CREATE OR REPLACE FUNCTION handle_referral() 
+CREATE OR REPLACE FUNCTION handle_referral()
 RETURNS TRIGGER AS $$
 DECLARE
     referrer            VARCHAR(20);
@@ -335,16 +334,16 @@ DECLARE
 BEGIN
     -- Apply a 50% discount to the **new referee** (first-time user)
     SELECT client_id INTO client_id_val FROM client WHERE referral_code = referee;
-    
+
     INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
     VALUES (
-        nextval('discount_code_code_seq'), 
-        0.5,  
-        1000000, 
-        NOW() + INTERVAL '1 week', 
+        nextval('discount_code_code_seq'),
+        0.5,
+        1000000,
+        NOW() + INTERVAL '1 week',
         'private'
     ) RETURNING code INTO new_discount_code;
-    
+
     INSERT INTO private_code (code, client_id, time_stamp)
     VALUES (new_discount_code, client_id_val, NOW());
 
@@ -365,7 +364,7 @@ BEGIN
                 NOW() + INTERVAL '1 week', 
                 'private'
             ) RETURNING code INTO new_discount_code;
-        ELSE 
+        ELSE
             -- Percentage-based discount
             INSERT INTO discount_code (code, amount, discount_limit, expiration_time, code_type)
             VALUES (
@@ -407,7 +406,7 @@ BEGIN
     SELECT cart_status
     INTO cart_status_val
     FROM shopping_cart
-    WHERE cart_number = NEW.cart_number 
+    WHERE cart_number = NEW.cart_number
       AND client_id = NEW.client_id;
 
     IF cart_status_val = 'blocked'THEN
@@ -444,7 +443,7 @@ DECLARE
     stock_count_val SMALLINT;
 BEGIN
     SELECT stock_count INTO stock_count_val
-    FROM product 
+    FROM product
     WHERE id = NEW.product_id;
 
     IF stock_count_val < NEW.quantity THEN
@@ -501,19 +500,19 @@ BEGIN
         WHERE client_id = NEW.client_id
     ) INTO is_vip;
 
-    SELECT COUNT(*) 
+    SELECT COUNT(*)
     INTO cart_count_active
     FROM shopping_cart
     WHERE client_id = NEW.client_id
       AND cart_status = 'active';
 
-    SELECT COUNT(*) 
+    SELECT COUNT(*)
     INTO cart_count_total
     FROM shopping_cart
     WHERE client_id = NEW.client_id;
 
     -- Restrict total carts for both regular and VIP users
-    IF cart_count_total >= 5 THEN 
+    IF cart_count_total >= 5 THEN
         RAISE EXCEPTION 'users cannot have more than five shopping carts.';
     END IF;
 
@@ -559,7 +558,7 @@ BEGIN
         RAISE EXCEPTION 'Invalid discount code.';
     END IF;
 
-    SELECT COUNT(discount_code)   
+    SELECT COUNT(discount_code)
     INTO usage
     FROM applied_to
     WHERE discount_code = NEW.discount_code
@@ -664,12 +663,12 @@ Ensures that:
 CREATE OR REPLACE FUNCTION reduce_wallet_order()
 RETURNS TRIGGER AS $$
 DECLARE
-    transaction_type_val    transaction_type_enum; 
-    current_balance         DECIMAL(12, 2);       
-    total_amount            DECIMAL(12, 2) := 0;   
-    discount_amount         DECIMAL(12, 2) := 0;  
-    limit_value             DECIMAL(12, 2);        
-    discount_code           INT;                   
+    transaction_type_val    transaction_type_enum;
+    current_balance         DECIMAL(12, 2);
+    total_amount            DECIMAL(12, 2) := 0;
+    discount_amount         DECIMAL(12, 2) := 0;
+    limit_value             DECIMAL(12, 2);
+    discount_code           INT;
 BEGIN
     SELECT t.transaction_type
     INTO transaction_type_val
@@ -683,7 +682,7 @@ BEGIN
         FROM client c
         WHERE c.client_id = NEW.client_id;
 
-        SELECT COALESCE(SUM(a.cart_price), 0) 
+        SELECT COALESCE(SUM(a.cart_price), 0)
         INTO total_amount
         FROM added_to a
         WHERE a.client_id = NEW.client_id
@@ -691,7 +690,7 @@ BEGIN
           AND a.locked_number = NEW.locked_number;
 
         -- Process all discount codes applied to this order
-        FOR discount_code, discount_amount, limit_value IN 
+        FOR discount_code, discount_amount, limit_value IN
             SELECT a.discount_code, d.amount, d.discount_limit
             FROM applied_to a
             JOIN discount_code d ON a.discount_code = d.code
@@ -702,13 +701,13 @@ BEGIN
             -- Apply discount: Percentage-based or Fixed Amount
             IF discount_amount <= 1 THEN  
                 IF (total_amount * discount_amount) > limit_value THEN
-                    total_amount := total_amount - limit_value;  
+                    total_amount := total_amount - limit_value;
                 ELSE
-                    total_amount := total_amount - (total_amount * discount_amount); 
+                    total_amount := total_amount - (total_amount * discount_amount);
                 END IF;
-            ELSE  
+            ELSE
                 total_amount := total_amount - discount_amount;
-            END IF; 
+            END IF;
         END LOOP;
 
         IF total_amount < 0 THEN
@@ -746,7 +745,7 @@ RETURNS TRIGGER AS $$
 DECLARE
     is_vip_expired BOOLEAN := FALSE;
 BEGIN
-    SELECT (v.expiration_time < NOW()) 
+    SELECT (v.expiration_time < NOW())
     INTO is_vip_expired
     FROM vip_client v
     WHERE v.client_id = NEW.client_id;
@@ -758,7 +757,7 @@ BEGIN
           AND cart_number = NEW.cart_number;
     ELSE
         UPDATE shopping_cart
-        SET cart_status = 'active'  
+        SET cart_status = 'active'
         WHERE client_id = NEW.client_id
           AND cart_number = NEW.cart_number;
     END IF;
@@ -784,15 +783,15 @@ RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO vip_client(client_id, expiration_time)
     VALUES (NEW.client_id, NOW() + INTERVAL '1 month')
-    ON CONFLICT (client_id) 
-    DO UPDATE SET expiration_time = NOW() + INTERVAL '1 month'; 
+    ON CONFLICT (client_id)
+    DO UPDATE SET expiration_time = NOW() + INTERVAL '1 month';
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER convert_vip_after_sub_trigger
-AFTER INSERT ON subscribes 
+AFTER INSERT ON subscribes
 FOR EACH ROW
 EXECUTE FUNCTION convert_to_vip();
 
@@ -809,13 +808,13 @@ DECLARE
     vip_client_record RECORD;
     cashback_amount DECIMAL(12,2);
 BEGIN
-    FOR vip_client_record IN 
+    FOR vip_client_record IN
         SELECT c.client_id, COALESCE(SUM(adt.cart_price), 0) * 0.15 AS total_cashback
-        FROM vip_client vc 
+        FROM vip_client vc
         JOIN issued_for ifo ON vc.client_id = ifo.client_id
         JOIN transaction t  ON ifo.tracking_code = t.tracking_code
-        JOIN added_to adt   ON ifo.client_id = adt.client_id 
-            AND ifo.cart_number = adt.cart_number 
+        JOIN added_to adt   ON ifo.client_id = adt.client_id
+            AND ifo.cart_number = adt.cart_number
             AND ifo.locked_number = adt.locked_number
         WHERE t.transaction_status = 'Successful'
         AND t.time_stamp >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
@@ -846,22 +845,22 @@ Job:
 */
 CREATE OR REPLACE FUNCTION check_order()
 RETURNS VOID AS $$
-DECLARE 
+DECLARE
     locked_cart_expired RECORD;
     product_rec RECORD;
 BEGIN
-    FOR locked_cart_expired IN 
+    FOR locked_cart_expired IN
         SELECT *
-        FROM locked_shopping_cart NATURAL JOIN shopping_cart 
-        WHERE cart_status = 'locked' 
+        FROM locked_shopping_cart NATURAL JOIN shopping_cart
+        WHERE cart_status = 'locked'
           AND (NOW() - time_stamp) > INTERVAL '3 day'
     LOOP
         -- Return amount of products stock count
-        FOR product_rec IN 
+        FOR product_rec IN
             SELECT product_id, quantity
             FROM locked_cart_expired NATURAL JOIN added_to
         LOOP
-            UPDATE product 
+            UPDATE product
             SET stock_count = stock_count + product_rec.quantity
             WHERE id = product_rec.product_id;
         END LOOP;
@@ -871,7 +870,7 @@ BEGIN
         SET cart_status = 'blocked'
         WHERE cart_number = locked_cart_expired.cart_number
           AND client_id = locked_cart_expired.client_id;
-        
+
         UPDATE locked_shopping_cart
         SET time_stamp = NOW() + INTERVAL '7 days'
         WHERE cart_number = locked_cart_expired.cart_number

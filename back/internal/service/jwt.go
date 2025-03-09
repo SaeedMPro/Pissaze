@@ -12,7 +12,7 @@ import (
 
 var JwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 const(
-	expireTime   = 24 * time.Hour
+	expireTime   = 48 * time.Hour
 ) 
 
 func GenerateTokenStr(client *models.ClientAbstract) (string, error) {

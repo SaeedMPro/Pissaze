@@ -2,10 +2,13 @@ import {createSlice , PayloadAction} from "@reduxjs/toolkit";
 
 interface Tabs {
     tab : string
+    subTab : string
 }
 
 const initialState : Tabs = {
-    tab : 'profile'
+    tab : 'profile',
+    subTab:'UserInformation'
+
 }
 
 const tabsSlice = createSlice({
@@ -14,9 +17,13 @@ const tabsSlice = createSlice({
     reducers : {
         updateTab(state , action : PayloadAction<string>){
             state.tab = action.payload
+        },
+        updateSubTab(state , action : PayloadAction<string>){
+            state.subTab = action.payload
         }
+
     }
 })
 
-export const {updateTab} = tabsSlice.actions
+export const {updateTab , updateSubTab} = tabsSlice.actions
 export default tabsSlice.reducer
