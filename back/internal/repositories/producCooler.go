@@ -39,7 +39,7 @@ func GetAllProductCooler() ([]models.ProductCooler, error) {
 
 func GetCoolerByID(id int) (*models.ProductCooler, error) {
 	db := storage.GetDB()
-
+	
 	query := `
 		SELECT p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, p.product_image,
 		       c.cooling_method, c.fan_size, c.max_rotational_speed, c.wattage, c.depth, c.height, c.width
@@ -58,6 +58,7 @@ func GetCoolerByID(id int) (*models.ProductCooler, error) {
 		}
 		return nil, err
 	}
+	
 	return &product, nil
 }
 

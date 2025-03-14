@@ -8,7 +8,6 @@ import (
 	"github.com/pissaze/internal/service"
 )
 
-// /api/login
 func registerLoginRouter(r *gin.Engine) {
 	group := r.Group("/api/login")
 

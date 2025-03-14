@@ -10,8 +10,6 @@ import (
 	"github.com/pissaze/internal/service"
 )
 
-// /api/product/list
-// /api/product/compatible
 func registerProductRoutes(r *gin.Engine) {
 	group := r.Group("/api/product")
 
@@ -104,6 +102,8 @@ func getCompatibleWithProductsList(c *gin.Context) {
 		return
 	}
 	compatible = service.FilterBy(compatible,req.Filter)
+
+	
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Message: "Compatible products retrieved successfully",

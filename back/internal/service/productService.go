@@ -113,3 +113,7 @@ func GETAllProducts()([]models.ProductInterface,error){
 	return list, nil
 }
 
+func GetPoduct(){
+
+}
+
