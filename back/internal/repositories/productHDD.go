@@ -40,7 +40,7 @@ func GetHDDByID(id int) (*models.ProductHDD, error) {
 	db := storage.GetDB()
 
 	query := `
-		SELECT p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, p.product_image
+		SELECT p.id, p.brand, p.model, p.current_price, p.stock_count, p.category, p.product_image,
 		       h.capacity, h.rotational_speed, h.wattage, h.depth, h.height, h.width
 		FROM product p
 		JOIN product_hdd h ON p.id = h.product_id
