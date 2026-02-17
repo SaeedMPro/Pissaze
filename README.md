@@ -38,11 +38,6 @@ chmod +x scripts/seed-db.sh
   docker build --network=host -f client/Dockerfile -t pissaze-client:latest ./client
   docker compose up -d
   ```
-- Or use an npm registry mirror when building:
-  ```bash
-  docker compose build --build-arg NPM_REGISTRY=https://registry.npmmirror.com
-  docker compose up -d
-  ```
 
 ## Learn More
   - [Gin Documentation](https://gin-gonic.com/) - Learn about Gin framework features.
