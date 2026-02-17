@@ -49,7 +49,7 @@ export default function CompatibilityDialog() {
         const sendCompatible = async () => {
             setLoading(true);
             try {
-                const res = await axios.post(`${process.env.NEXT_PUBLIC_URL}/product/compatible`, {
+                const res = await axios.post(`${process.env.NEXT_PUBLIC_URL}/api/product/compatible`, {
                     "filter_list_category": categoryChoice,
                     'product_id': productsChoice
                 }, {headers: {Authorization: token},})

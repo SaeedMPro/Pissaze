@@ -12,11 +12,8 @@ import (
 var dataBase *sql.DB
 func init(){
 	fmt.Println("connecting to database...")
-	err := godotenv.Load()
-
-	if err != nil {
-		panic(err)
-	}
+	// Optional: load .env when present (e.g. local dev); in Docker env vars are set by compose
+	_ = godotenv.Load()
 
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")

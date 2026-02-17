@@ -19,7 +19,7 @@ export default function UserInformation() {
         const fetchUserInformation = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/client/`, {headers: {Authorization: token}});
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/client/`, {headers: {Authorization: token}});
                 setUserInfo(response.data.data);
                 setLoading(false);
             } catch (e) {

@@ -1,6 +1,6 @@
 module github.com/pissaze
 
-go 1.24.0
+go 1.25.1
 
 require (
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1

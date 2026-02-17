@@ -14,7 +14,7 @@ export default function UserShopping() {
         const fetchCartStatus = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/client/cart`, {headers: {Authorization: token}});
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/client/cart`, {headers: {Authorization: token}});
                 setCartStatus(response.data.data)
                 setLoading(false);
             } catch (e) {
@@ -27,7 +27,7 @@ export default function UserShopping() {
         const fetchLockCart = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/client/lockCart`, {headers: {Authorization: token}});
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/client/lockCart`, {headers: {Authorization: token}});
                 setLockCart(response.data.data)
                 setLoading(false);
             } catch (e) {

@@ -18,7 +18,7 @@ export default function UserDiscount() {
         const fetchUserDiscount = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/client/discountCode`, {headers: {Authorization: token}});
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/client/discountCode`, {headers: {Authorization: token}});
                 setUserDiscount(response.data.data);
                 console.log(response);
                 setLoading(false);

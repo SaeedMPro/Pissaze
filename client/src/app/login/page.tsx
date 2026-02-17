@@ -19,7 +19,7 @@ export default function Login() {
     const handleLogin = async () => {
         try {
             setLoading(true);
-            const response = await axios.post("http://localhost:8082/api/login/", {"phone_number": phoneNumber});
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:8082'}/api/login/`, {"phone_number": phoneNumber});
             if (response.status === 200) {
                 setPhoneNumber("");
 

@@ -7,14 +7,14 @@ CREATE DATABASE pissaze_system;
 -- Connect to the database
 \c pissaze_system
 
--- Create extension for job scheduled (pg_cron)
+-- Create extension for job scheduled (pg_cron) - disabled for default image (install pg_cron to enable)
 /*
    This extension allows for scheduling cron jobs directly within PostgreSQL (for Unix-based systems).
    Ensure pg_cron is installed in the default database (postgres) before using it in other databases.
    After installing, change `shared_preload_libraries = 'pg_cron'` in `postgresql.conf`.
    Also, add `cron.database_name = 'pissaze_system'` to `postgresql.conf`.
 */
-CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 
 -- Create ENUM types
@@ -830,10 +830,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT cron.schedule(
-    '0 0 1 * *', -- Runs at midnight on the 1st of each month
-    'SELECT add_monthly_cashback();'
-);
+-- SELECT cron.schedule(
+--     '0 0 1 * *', -- Runs at midnight on the 1st of each month
+--     'SELECT add_monthly_cashback();'
+-- );
 
 
 /*
@@ -882,10 +882,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT cron.schedule(
-    '0 0 * * *', -- Runs daily at midnight
-    'SELECT check_order();'
-);
+-- SELECT cron.schedule(
+--     '0 0 * * *', -- Runs daily at midnight
+--     'SELECT check_order();'
+-- );
 
 
 /*
@@ -908,7 +908,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT cron.schedule(
-    '0 0 * * *', -- Runs daily at midnight
-    'SELECT handle_subscription_end();'
-);
+-- SELECT cron.schedule(
+--     '0 0 * * *', -- Runs daily at midnight
+--     'SELECT handle_subscription_end();'
+-- );

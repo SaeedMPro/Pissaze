@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pissaze
+      POSTGRES_PASSWORD: pissaze
+      POSTGRES_DB: pissaze
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./back/internal/storage:/storage:ro
+      - ./back/internal/storage/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pissaze -d pissaze"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  db-seed:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: pissaze
+    volumes:
+      - ./back/internal/storage:/storage:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        EXISTS=$$(psql -h postgres -U pissaze -d pissaze -t -A -c "SELECT count(*) FROM pg_database WHERE datname='pissaze_system'")
+        if [ "$$EXISTS" = "1" ]; then
+          echo "pissaze_system already exists, skipping seed."
+          exit 0
+        fi
+        echo "Creating pissaze_system and loading schema..."
+        psql -h postgres -U pissaze -d pissaze -v ON_ERROR_STOP=1 -f /storage/createdDB.sql
+        echo "Seeding Persian data..."
+        psql -h postgres -U pissaze -d pissaze_system -v ON_ERROR_STOP=1 -f /storage/persian_dataset.sql
+        echo "Seed done."
+    restart: "no"
+
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8082"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: pissaze
+      DB_PASSWORD: pissaze
+      DB_NAME: pissaze_system
+    ports:
+      - "8082:8082"
+    depends_on:
+      db-seed:
+        condition: service_completed_successfully
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        # URL the browser uses to call the API (host machine)
+        NEXT_PUBLIC_URL: http://localhost:8082
+        NEXT_PUBLIC_EXPIRE_TOKEN: "1"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - back
+
+volumes:
+  postgres_data: {}
